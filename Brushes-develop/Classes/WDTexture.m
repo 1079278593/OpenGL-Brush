@@ -73,9 +73,10 @@
     }
     
     if (textureName_) {
-        WDLog(@"WARNING: WDTexture leaking GL texture.");
+        NSLog(@"WARNING: WDTexture leaking GL texture.");
     }
     
+    //check gl error
     WDCheckGLError();
 }
 

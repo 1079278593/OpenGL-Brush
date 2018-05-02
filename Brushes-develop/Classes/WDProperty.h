@@ -21,8 +21,8 @@
 @property (nonatomic) NSString *title;
 @property (nonatomic, assign) float minimumValue;
 @property (nonatomic, assign) float maximumValue;
-@property (nonatomic, readonly) BOOL canDecrement;
-@property (nonatomic, readonly) BOOL canIncrement;
+@property (nonatomic, readonly) BOOL canDecrement;//衰减
+@property (nonatomic, readonly) BOOL canIncrement;//增长
 @property (nonatomic, assign) float value;
 
 @property (nonatomic, weak) id<WDPropertyDelegate> delegate;

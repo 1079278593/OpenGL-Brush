@@ -34,6 +34,7 @@ static NSString *WDValueKey = @"value";
 @synthesize value;
 @synthesize delegate;
 
+#pragma mark - Life Cycle
 + (WDProperty *) property
 {
     return [[WDProperty alloc] init];
@@ -69,6 +70,7 @@ static NSString *WDValueKey = @"value";
     return copy;
 }
 
+#pragma mark -
 - (BOOL) isEqual:(WDProperty *)object
 {
     if (!object) {

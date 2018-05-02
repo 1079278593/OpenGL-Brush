@@ -79,6 +79,7 @@ NSString *WDGestureEndedNotification = @"WDGestureEnded";
 @synthesize dirtyRect;
 @synthesize currentlyPainting;
 
+#pragma mark - Life Cycle
 + (Class) layerClass
 {
     return [CAEAGLLayer class];
@@ -978,6 +979,7 @@ NSString *WDGestureEndedNotification = @"WDGestureEnded";
     [[WDActiveState sharedInstance].activeTool gestureEnded:sender];
 }
 
+#pragma mark - 绘制动作监听
 - (void) handlePanGesture:(WDPanGestureRecognizer *)sender
 {
     if (![self canSendTouchToActiveTool]) {

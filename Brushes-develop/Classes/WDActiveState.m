@@ -271,7 +271,7 @@ static NSString *WDSwatchKey = @"WDSwatchKey";
     [self saveBrushes];
 }
 
-#pragma mark 读取笔刷
+#pragma mark 从json文件或者本地缓存，读取笔刷
 - (void) configureBrushes
 {
     NSData *brushData = [[NSUserDefaults standardUserDefaults] objectForKey:@"brushes"];

@@ -785,15 +785,17 @@ NSString *WDActiveLayerChangedNotification = @"WDActiveLayerChangedNotification"
     brushTexture_ = nil;
 }
 
+#pragma mark 根据WDBrush生成笔刷纹理
 - (WDTexture *) brushTexture:(WDBrush *)brush
 {
+    NSLog(@"生成笔刷纹理");
     [EAGLContext setCurrentContext:self.context];
     
     if (!brushTexture_ || (brush != lastBrush_)) {
         WDStampGenerator *gen = brush.generator;
         
         if (brushTexture_) {
-            [brushTexture_ freeGLResources];
+            [brushTexture_ freeGLResources];//删除之前绑定的纹理：glDeleteTextures()
         }
         
         brushTexture_ = [WDTexture alphaTextureWithImage:gen.stamp];
@@ -803,8 +805,10 @@ NSString *WDActiveLayerChangedNotification = @"WDActiveLayerChangedNotification"
     return brushTexture_;
 }
 
+#pragma mark 根据WDBrush配置笔刷
 - (void) configureBrush:(WDBrush *)brush
 {
+    NSLog(@"配置笔刷");
     WDShader *brushShader = [self getShader:@"brush"];
     glUseProgram(brushShader.program);
     
@@ -825,6 +829,7 @@ NSString *WDActiveLayerChangedNotification = @"WDActiveLayerChangedNotification"
     return reusableFramebuffer;
 }
 
+#pragma mark - 根据路径绘制
 - (CGRect) paintStroke:(WDPath *)path randomizer:(WDRandom *)randomizer clear:(BOOL)clearBuffer
 {
     self.activePath = path;
@@ -858,7 +863,7 @@ NSString *WDActiveLayerChangedNotification = @"WDActiveLayerChangedNotification"
     return pathBounds;
 }
 
-#pragma mark - 笔画
+#pragma mark 笔画
 - (void) forgetStroke:(WDPath *)path
 {
     [[undoManager_ prepareWithInvocationTarget:self] recordStroke:path];    

@@ -1322,6 +1322,7 @@
     return unlockView;
 }
 
+#pragma mark tap手势
 - (void) oneTap:(UITapGestureRecognizer *)recognizer
 {
     if (self.replay && !self.replay.paused) {

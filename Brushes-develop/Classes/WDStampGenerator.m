@@ -42,6 +42,7 @@ static NSString *WDUUIDKey = @"uuid";
 @synthesize delegate;
 @synthesize blurRadius;
 
+#pragma mark - Life Cycle
 + (WDStampGenerator *) generator
 {
     WDStampGenerator *generator = [[[self class] alloc] init];
@@ -111,6 +112,7 @@ static NSString *WDUUIDKey = @"uuid";
     [NSException raise:@"Unimplemented method" format:@"renderStamp:randomizer: in %@", [self class]];
 }
 
+#pragma mark - 生成‘图章’
 - (UIImage *) generateStamp
 {
     size_t  width = self.size.width;
@@ -130,6 +132,7 @@ static NSString *WDUUIDKey = @"uuid";
     CGContextSetGrayFillColor(context, 0.0f, 1.0f);
     CGContextFillRect(context, bounds);
     
+    //这个很重要
     WDRandom *random = [[WDRandom alloc] initWithSeed:self.seed];
     
     if (self.scale != 1.0) {
@@ -191,6 +194,7 @@ static NSString *WDUUIDKey = @"uuid";
     return smallStamp;
 }
 
+#pragma mark -
 - (CGRect) bounds
 {
     CGRect result = CGRectZero;

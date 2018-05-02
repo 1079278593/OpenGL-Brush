@@ -21,7 +21,7 @@
 @private
 }
 
-@property (nonatomic, strong) WDStampGenerator *generator;
+@property (nonatomic, strong) WDStampGenerator *generator;//图章生成器
 @property (nonatomic) UIImage *noise;
 
 @property (nonatomic) WDProperty *weight;             // [1.0, 512.0] -- pixels

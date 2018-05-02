@@ -63,25 +63,26 @@ static NSString *WDUUIDKey = @"uuid";
 
 @synthesize uuid = uuid_;
 
+#pragma mark - Life Cycle
 + (WDBrush *) brushWithGenerator:(WDStampGenerator *)generator
 {
     return [[[self class] alloc] initWithGenerator:generator];
 }
 
-+ (WDBrush *) randomBrush
+
+- (id) initWithGenerator:(WDStampGenerator *)shapeGenerator
 {
-    NSArray *generators = [[WDActiveState sharedInstance] canonicalGenerators];
-    WDStampGenerator *generator = generators[WDRandomIntInRange(0, generators.count)];
+    self = [super init];
     
-    WDBrush *random = [WDBrush brushWithGenerator:[generator copy]];
+    if (!self) {
+        return nil;
+    }
     
-    [generator randomize];
-    [generator configureBrush:random];
+    self.generator = shapeGenerator;
+    generator.delegate = self;
+    [self buildProperties];
     
-    random.weight.value = WDRandomFloat() * 56 + 44;
-    random.intensity.value = 0.15f;
-    random.spacing.value = 0.02;
-    return random;
+    return self;
 }
 
 - (id) copyWithZone:(NSZone *)zone
@@ -101,6 +102,23 @@ static NSString *WDUUIDKey = @"uuid";
     
     copy.uuid = self.uuid;
     return copy;
+}
+
+#pragma mark - 生成随机笔刷
++ (WDBrush *) randomBrush
+{
+    NSArray *generators = [[WDActiveState sharedInstance] canonicalGenerators];
+    WDStampGenerator *generator = generators[WDRandomIntInRange(0, generators.count)];
+    
+    WDBrush *random = [WDBrush brushWithGenerator:[generator copy]];
+    
+    [generator randomize];
+    [generator configureBrush:random];
+    
+    random.weight.value = WDRandomFloat() * 56 + 44;
+    random.intensity.value = 0.15f;
+    random.spacing.value = 0.02;
+    return random;
 }
 
 - (BOOL) isEqual:(WDBrush *)object
@@ -201,20 +219,6 @@ static NSString *WDUUIDKey = @"uuid";
     intensityDynamics.delegate = self;
 }
 
-- (id) initWithGenerator:(WDStampGenerator *)shapeGenerator
-{
-    self = [super init];
-    
-    if (!self) {
-        return nil;
-    }
-    
-    self.generator = shapeGenerator;
-    generator.delegate = self;
-    [self buildProperties];
-    
-    return self;
-}
 
 
 - (void) propertyChanged:(WDProperty *)property
@@ -350,6 +354,7 @@ static NSString *WDUUIDKey = @"uuid";
     }
 }
 
+#pragma mark 根据decoder的内容，给brush的属性赋值，生成‘图章’
 - (void) updateWithWDDecoder:(id<WDDecoder>)decoder deep:(BOOL)deep
 {
     if (deep) {
