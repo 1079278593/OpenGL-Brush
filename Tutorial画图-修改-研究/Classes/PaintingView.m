@@ -24,6 +24,9 @@
 #import "UIBezierPath+Geometry.h"
 #import "SVGPathGet.h"
 
+//笔刷
+#import "WDPainting.h"
+
 //CONSTANTS:
 
 #define kBrushOpacity		(1.0 / 3.0)
@@ -555,6 +558,58 @@ typedef struct {
 #pragma mark - Private Method
 #pragma mark 根据点来画线条
 // Drawings a line onscreen based on where the user touches
+- (void)renderLineFromPoint_0:(CGPoint)start toPoint:(CGPoint)end
+{
+    static GLfloat*        vertexBuffer = NULL;
+    static NSUInteger    vertexMax = 64;
+    NSUInteger            vertexCount = 0,
+    count,
+    i;
+    
+    [EAGLContext setCurrentContext:context];
+    glBindFramebuffer(GL_FRAMEBUFFER, viewFramebuffer);
+    
+    // Convert locations from Points to Pixels
+    CGFloat scale = self.contentScaleFactor;
+    start.x *= scale;
+    start.y *= scale;
+    end.x *= scale;
+    end.y *= scale;
+    
+    // Allocate vertex array buffer
+    if(vertexBuffer == NULL)
+        vertexBuffer = malloc(vertexMax * 2 * sizeof(GLfloat));
+    
+    // Add points to the buffer so there are drawing points every X pixels
+    count = MAX(ceilf(sqrtf((end.x - start.x) * (end.x - start.x) + (end.y - start.y) * (end.y - start.y)) / kBrushPixelStep), 1);
+    for(i = 0; i < count; ++i) {
+        if(vertexCount == vertexMax) {
+            vertexMax = 2 * vertexMax;
+            vertexBuffer = realloc(vertexBuffer, vertexMax * 2 * sizeof(GLfloat));
+        }
+        
+        //将点放入vertexBuffer
+        vertexBuffer[2 * vertexCount + 0] = start.x + (end.x - start.x) * ((GLfloat)i / (GLfloat)count);
+        vertexBuffer[2 * vertexCount + 1] = start.y + (end.y - start.y) * ((GLfloat)i / (GLfloat)count);
+        vertexCount += 1;
+    }
+    
+    // Load data to the Vertex Buffer Object
+    glBindBuffer(GL_ARRAY_BUFFER, vboId);
+    glBufferData(GL_ARRAY_BUFFER, vertexCount*2*sizeof(GLfloat), vertexBuffer, GL_DYNAMIC_DRAW);
+    
+    glEnableVertexAttribArray(ATTRIB_VERTEX);
+    glVertexAttribPointer(ATTRIB_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    
+    // Draw
+    glUseProgram(program[PROGRAM_POINT].id);
+    glDrawArrays(GL_POINTS, 0, (int)vertexCount);
+    
+    // Display the buffer
+    glBindRenderbuffer(GL_RENDERBUFFER, viewRenderbuffer);
+    [context presentRenderbuffer:GL_RENDERBUFFER];
+}
+
 - (void)renderLineFromPoint:(CGPoint)start toPoint:(CGPoint)end
 {
     static GLfloat*        vertexBuffer = NULL;

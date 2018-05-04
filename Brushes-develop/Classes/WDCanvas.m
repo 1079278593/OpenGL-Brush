@@ -85,94 +85,26 @@ NSString *WDGestureEndedNotification = @"WDGestureEnded";
     return [CAEAGLLayer class];
 }
 
-- (void) configureGestures
+- (void)layoutSubviews
 {
-    // Create a long press recognizer to auto-activate the eyedropper tool
-    UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPress:)];
-    longPress.minimumPressDuration = kDropperActivationDelay;
-    longPress.delegate = self;
-    [self addGestureRecognizer:longPress];
+    [super layoutSubviews];
     
-    // Create a two finger tap double tap recognizer to auto-fit the doc
-    UITapGestureRecognizer *twoFingerDoubleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(twoFingerDoubleTap:)];
-    twoFingerDoubleTap.numberOfTouchesRequired = 2;
-    twoFingerDoubleTap.numberOfTapsRequired = 2;
-    twoFingerDoubleTap.delegate = self;
-    [self addGestureRecognizer:twoFingerDoubleTap];
+    [mainRegion resize];
     
-    // Create a two finger tap recognizer to auto-hide the interface
-    UITapGestureRecognizer *twoFingerTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(twoFingerTap:)];
-    twoFingerTap.numberOfTouchesRequired = 2;
-    twoFingerTap.delegate = self;
-    [twoFingerTap requireGestureRecognizerToFail:twoFingerDoubleTap];
-    [self addGestureRecognizer:twoFingerTap];
-    
-    // create a one finger tap to auto-hide or paint a dot
-    UITapGestureRecognizer *oneFingerTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(oneTap:)];
-    oneFingerTap.numberOfTouchesRequired = 1;
-    oneFingerTap.delegate = self;
-    [self addGestureRecognizer:oneFingerTap];
-    
-    // Create a pinch recognizer to scale the canvas
-    UIPinchGestureRecognizer *pinchGesture = [[UIPinchGestureRecognizer alloc]
-                                              initWithTarget:self action:@selector(handlePinchGesture:)];
-    pinchGesture.delegate = self;
-    [self addGestureRecognizer:pinchGesture];
-    
-    // Create a pan gesture for painting
-    WDPanGestureRecognizer *panGesture = [[WDPanGestureRecognizer alloc]
-                                          initWithTarget:self action:@selector(handlePanGesture:)];
-    panGesture.maximumNumberOfTouches = 1;
-    panGesture.delegate = self;
-    [self addGestureRecognizer:panGesture];
-    
-//    // add a swipe left (3 fingers) to trigger undo
-//    UISwipeGestureRecognizer *swipeLeft = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeLeft:)];
-//    swipeLeft.delegate = self;
-//    swipeLeft.numberOfTouchesRequired = 3;
-//    swipeLeft.direction = UISwipeGestureRecognizerDirectionLeft;
-//    [self addGestureRecognizer:swipeLeft];
-//    
-//    // add a swipe right (3 fingers) to trigger redo
-//    UISwipeGestureRecognizer *swipeRight = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeRight:)];
-//    swipeRight.delegate = self;
-//    swipeRight.numberOfTouchesRequired = 3;
-//    swipeRight.direction = UISwipeGestureRecognizerDirectionRight;
-//    [self addGestureRecognizer:swipeRight];
-//    
-//    // constraints
-//    [longPress requireGestureRecognizerToFail:swipeLeft];
-//    [panGesture requireGestureRecognizerToFail:swipeLeft];
-//    [pinchGesture requireGestureRecognizerToFail:swipeLeft];
-//    
-//    [longPress requireGestureRecognizerToFail:swipeRight];
-//    [panGesture requireGestureRecognizerToFail:swipeRight];
-//    [pinchGesture requireGestureRecognizerToFail:swipeRight];
+    [self drawView];
 }
 
-- (void) swipeLeft:(UISwipeGestureRecognizer *)recognizer
+- (void) dealloc
 {
-    if (self.controller.isEditing) {
-        [self.controller undo:nil];
-    }
-}
-
-- (void) swipeRight:(UISwipeGestureRecognizer *)recognizer
-{
-    if (self.controller.isEditing) {
-        [self.controller redo:nil];
-    }
-}
-
-- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
-{
-    if (self.gesturesDisabled) {
-        return NO;
-    } else if (!self.controller.isEditing) {
-        return ![gestureRecognizer isKindOfClass:[UILongPressGestureRecognizer class]];
-    }
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     
-    return YES;
+    [EAGLContext setCurrentContext:self.context];
+    [self.shadowSegments makeObjectsPerformSelector:@selector(freeGLResources)];
+    
+    [self nixMessageLabel];
+    [self nixImageMessageView];
+    
+    self.context = nil; // clears OpenGL objects
 }
 
 - (id) initWithFrame:(CGRect)frame
@@ -216,6 +148,97 @@ NSString *WDGestureEndedNotification = @"WDGestureEnded";
     [self configureGestures];
     
     return self;
+}
+
+#pragma mark -
+- (void) configureGestures
+{
+    // Create a long press recognizer to auto-activate the eyedropper tool
+    UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPress:)];
+    longPress.minimumPressDuration = kDropperActivationDelay;
+    longPress.delegate = self;
+    [self addGestureRecognizer:longPress];
+    
+    // Create a two finger tap double tap recognizer to auto-fit the doc
+    UITapGestureRecognizer *twoFingerDoubleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(twoFingerDoubleTap:)];
+    twoFingerDoubleTap.numberOfTouchesRequired = 2;
+    twoFingerDoubleTap.numberOfTapsRequired = 2;
+    twoFingerDoubleTap.delegate = self;
+    [self addGestureRecognizer:twoFingerDoubleTap];
+    
+    // Create a two finger tap recognizer to auto-hide the interface
+    UITapGestureRecognizer *twoFingerTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(twoFingerTap:)];
+    twoFingerTap.numberOfTouchesRequired = 2;
+    twoFingerTap.delegate = self;
+    [twoFingerTap requireGestureRecognizerToFail:twoFingerDoubleTap];
+    [self addGestureRecognizer:twoFingerTap];
+    
+    // create a one finger tap to auto-hide or paint a dot
+    UITapGestureRecognizer *oneFingerTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(oneTap:)];
+    oneFingerTap.numberOfTouchesRequired = 1;
+    oneFingerTap.delegate = self;
+    [self addGestureRecognizer:oneFingerTap];
+    
+    // Create a pinch recognizer to scale the canvas
+    UIPinchGestureRecognizer *pinchGesture = [[UIPinchGestureRecognizer alloc]
+                                              initWithTarget:self action:@selector(handlePinchGesture:)];
+    pinchGesture.delegate = self;
+    [self addGestureRecognizer:pinchGesture];
+    
+    // Create a pan gesture for painting
+    WDPanGestureRecognizer *panGesture = [[WDPanGestureRecognizer alloc]
+                                          initWithTarget:self action:@selector(handlePanGesture:)];
+    panGesture.maximumNumberOfTouches = 1;
+    panGesture.delegate = self;
+    [self addGestureRecognizer:panGesture];
+    
+    //    // add a swipe left (3 fingers) to trigger undo
+    //    UISwipeGestureRecognizer *swipeLeft = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeLeft:)];
+    //    swipeLeft.delegate = self;
+    //    swipeLeft.numberOfTouchesRequired = 3;
+    //    swipeLeft.direction = UISwipeGestureRecognizerDirectionLeft;
+    //    [self addGestureRecognizer:swipeLeft];
+    //
+    //    // add a swipe right (3 fingers) to trigger redo
+    //    UISwipeGestureRecognizer *swipeRight = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeRight:)];
+    //    swipeRight.delegate = self;
+    //    swipeRight.numberOfTouchesRequired = 3;
+    //    swipeRight.direction = UISwipeGestureRecognizerDirectionRight;
+    //    [self addGestureRecognizer:swipeRight];
+    //
+    //    // constraints
+    //    [longPress requireGestureRecognizerToFail:swipeLeft];
+    //    [panGesture requireGestureRecognizerToFail:swipeLeft];
+    //    [pinchGesture requireGestureRecognizerToFail:swipeLeft];
+    //
+    //    [longPress requireGestureRecognizerToFail:swipeRight];
+    //    [panGesture requireGestureRecognizerToFail:swipeRight];
+    //    [pinchGesture requireGestureRecognizerToFail:swipeRight];
+}
+
+- (void) swipeLeft:(UISwipeGestureRecognizer *)recognizer
+{
+    if (self.controller.isEditing) {
+        [self.controller undo:nil];
+    }
+}
+
+- (void) swipeRight:(UISwipeGestureRecognizer *)recognizer
+{
+    if (self.controller.isEditing) {
+        [self.controller redo:nil];
+    }
+}
+
+- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
+{
+    if (self.gesturesDisabled) {
+        return NO;
+    } else if (!self.controller.isEditing) {
+        return ![gestureRecognizer isKindOfClass:[UILongPressGestureRecognizer class]];
+    }
+    
+    return YES;
 }
 
 - (void) registerNotifications
@@ -527,6 +550,7 @@ NSString *WDGestureEndedNotification = @"WDGestureEnded";
 
 - (void) updateIfNeeded
 {
+    NSLog(@"canvas updateIfNeeded");
     if (CGRectEqualToRect(self.dirtyRect, CGRectZero)) {
         return;
     }
@@ -534,6 +558,7 @@ NSString *WDGestureEndedNotification = @"WDGestureEnded";
     [self drawViewInRect:self.dirtyRect];
 }
 
+#pragma mark - draw
 - (void) drawViewAtEndOfRunLoop
 {
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(drawView) object:nil];
@@ -620,6 +645,7 @@ NSString *WDGestureEndedNotification = @"WDGestureEnded";
     glBindVertexArrayOES(0);
 }
 
+#pragma mark -
 - (NSArray *) shadowSegments
 {
     if (!shadowSegments) {
@@ -642,27 +668,6 @@ NSString *WDGestureEndedNotification = @"WDGestureEnded";
     return shadowSegments;
 }
 
-- (void)layoutSubviews
-{
-    [super layoutSubviews];
-    
-    [mainRegion resize];
-
-    [self drawView];
-}
-
-- (void) dealloc
-{
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    
-    [EAGLContext setCurrentContext:self.context];
-    [self.shadowSegments makeObjectsPerformSelector:@selector(freeGLResources)];
-    
-    [self nixMessageLabel];
-    [self nixImageMessageView];
-    
-    self.context = nil; // clears OpenGL objects
-}
 
 - (void)setContext:(EAGLContext *)context
 {
@@ -688,6 +693,7 @@ NSString *WDGestureEndedNotification = @"WDGestureEnded";
     userSpacePivot_ = WDAddPoints(userSpacePivot_, delta);
 }
 
+#pragma mark - fresh
 - (void) setFrame:(CGRect)frame
 {
     if (self.painting) {
@@ -738,6 +744,7 @@ NSString *WDGestureEndedNotification = @"WDGestureEnded";
     [self rebuildViewTransformAndRedraw_:YES];
 }
 
+#pragma mark -
 - (void) offsetByDelta:(CGPoint)delta
 {
     deviceSpacePivot_ = WDAddPoints(deviceSpacePivot_, delta);

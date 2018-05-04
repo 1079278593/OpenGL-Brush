@@ -124,6 +124,7 @@ static BOOL powerOf2(int x)
 /* 
  * Allocate and populate image data for OpenGL
  */
+#pragma mark 将image数据写入data,获取textName时，传递给glTexImage2D生成纹理，并返回索引
 - (void) loadTextureFromImage:(CGImageRef)image forceRGB:(BOOL)forceRGB
 {
     BOOL isAlpha = forceRGB ? NO : CGImageGetBitsPerPixel(image) == 8;

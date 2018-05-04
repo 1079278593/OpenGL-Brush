@@ -6,6 +6,9 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <OpenGLES/ES2/glext.h>
+#import "WDShader.h"
+#import "gl_matrix.h"
 #import "WDTexture.h"
 #import "WDStampGenerator.h"
 
