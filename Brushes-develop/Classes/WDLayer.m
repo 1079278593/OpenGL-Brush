@@ -329,6 +329,7 @@ static NSString *WDVisibleKey = @"visible";
 #pragma mark - 从缓冲区获取指定大小的image data
 - (NSData *) imageDataInRect:(CGRect)rect
 {
+//    NSLog(@"imageDataInRect");
     NSData *result = nil;
     
     // make sure the painting's context is current
@@ -453,6 +454,7 @@ static NSString *WDVisibleKey = @"visible";
     }
 }
 
+#pragma mark 保存本次绘制结果，用于撤销时回档。touch end时候
 - (void) registerUndoInRect:(CGRect)rect
 {
     rect = CGRectIntersection(rect, self.painting.bounds);
