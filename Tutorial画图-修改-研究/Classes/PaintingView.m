@@ -212,9 +212,9 @@ typedef struct {
     // Create a Vertex Buffer Object to hold our data
     glGenBuffers(1, &vboId);
     
-    // Load the brush texture
-    brushTexture = [self textureFromName:@"Particle.png"];
-//    brushTexture = [self textureFromName:@"eye.png"];
+    // Load the brush texture:Particle.png、eye.png、hole.png
+//    brushTexture = [self textureFromName:@"Particle.png"];
+    brushTexture = [self textureFromName:@"eye.png"];
     
     // Load shaders
     [self setupShaders];
@@ -335,6 +335,7 @@ typedef struct {
 			}
 		}
 		
+        //glCreateProgram
 		glueCreateProgram(vsrc, fsrc,
                           attribCt, (const GLchar **)&attribUsed[0], attrib,
                           NUM_UNIFORMS, &uniformName[0], program[i].uniform,

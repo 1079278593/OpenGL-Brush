@@ -146,6 +146,186 @@ static NSString *WDVisibleKey = @"visible";
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, flag ? GL_LINEAR : GL_NEAREST);
 }
 
+#pragma mark - blit
+- (void) basicBlit:(GLfloat *)proj
+{
+    NSLog(@"basicBlit");
+    WDShader *blitShader = [self.painting getShader:@"blit"];
+    glUseProgram(blitShader.program);
+    
+    glUniformMatrix4fv([blitShader locationForUniform:@"modelViewProjectionMatrix"], 1, GL_FALSE, proj);
+    glUniform1i([blitShader locationForUniform:@"texture"], 0);
+    glUniform1f([blitShader locationForUniform:@"opacity"], opacity_);
+    
+    // Bind the texture to be used
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, self.textureName);
+    [self configureBlendMode];
+    
+    glBindVertexArrayOES(self.painting.quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    
+    // unbind VAO
+    glBindVertexArrayOES(0);
+}
+
+- (void) blit:(GLfloat *)proj
+{
+    NSLog(@"Layer: blit");
+    if (!CGAffineTransformIsIdentity(self.transform)) {
+        [self blit:proj withTransform:self.transform];
+        return;
+    }
+    
+    WDShader *blitShader = nil;
+    
+    if (self.colorBalance) {
+        blitShader = [self.painting getShader:@"colorBalanceBlit"];
+    } else if (self.hueSaturation) {
+        blitShader = [self.painting getShader:@"blitFromHueChromaLuma"];
+    } else {
+        blitShader = [self.painting getShader:@"blit"];
+    }
+    
+    glUseProgram(blitShader.program);
+    
+    glUniformMatrix4fv([blitShader locationForUniform:@"modelViewProjectionMatrix"], 1, GL_FALSE, proj);
+    glUniform1i([blitShader locationForUniform:@"texture"], 0);
+    glUniform1f([blitShader locationForUniform:@"opacity"], opacity_);
+    
+    if (self.colorBalance) {
+        glUniform1f([blitShader locationForUniform:@"redShift"], colorBalance_.redShift);
+        glUniform1f([blitShader locationForUniform:@"greenShift"], colorBalance_.greenShift);
+        glUniform1f([blitShader locationForUniform:@"blueShift"], colorBalance_.blueShift);
+        glUniform1i([blitShader locationForUniform:@"premultiply"], 1);
+    } else if (self.hueSaturation) {
+        glUniform1f([blitShader locationForUniform:@"hueShift"], hueSaturation_.hueShift);
+        glUniform1f([blitShader locationForUniform:@"saturationShift"], hueSaturation_.saturationShift);
+        glUniform1f([blitShader locationForUniform:@"brightnessShift"], hueSaturation_.brightnessShift);
+        glUniform1i([blitShader locationForUniform:@"premultiply"], 1);
+    }
+    
+    // Bind the texture to be used
+    glActiveTexture(GL_TEXTURE0);
+    if (self.hueSaturation) {
+        glBindTexture(GL_TEXTURE_2D, self.hueChromaLuma);
+    } else {
+        glBindTexture(GL_TEXTURE_2D, self.textureName);
+    }
+    
+    [self configureBlendMode];
+    
+    glBindVertexArrayOES(self.painting.quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    
+    // unbind VAO
+    glBindVertexArrayOES(0);
+}
+
+#pragma mark 根据transform进行‘位块传输’
+- (void) blit:(GLfloat *)proj withTransform:(CGAffineTransform)tX
+{
+    NSLog(@"Layer: blit withTransform");
+    // use shader program
+    WDShader *blitShader = [self.painting getShader:@"blit"];
+    glUseProgram(blitShader.program);
+    
+    glUniformMatrix4fv([blitShader locationForUniform:@"modelViewProjectionMatrix"], 1, GL_FALSE, proj);
+    glUniform1i([blitShader locationForUniform:@"texture"], 0);
+    glUniform1f([blitShader locationForUniform:@"opacity"], opacity_);
+    
+    // Bind the texture to be used
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, self.textureName);
+    
+    [self configureBlendMode];
+    CGRect rect = CGRectMake(0, 0, self.painting.dimensions.width, self.painting.dimensions.height);
+    
+    if (self.clipWhenTransformed) {
+        glEnable(GL_STENCIL_TEST);
+        glClearStencil(0);
+        glClear(GL_STENCIL_BUFFER_BIT);
+        
+        // All drawing commands fail the stencil test, and are not drawn, but increment the value in the stencil buffer.
+        glStencilFunc(GL_NEVER, 0, 0);
+        glStencilOp(GL_INCR, GL_INCR, GL_INCR);
+        
+        WDGLRenderInRect(rect, CGAffineTransformIdentity);
+        
+        // now, allow drawing, except where the stencil pattern is 0x1 and do not make any further changes to the stencil buffer
+        glStencilFunc(GL_EQUAL, 1, 1);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+    }
+    
+    WDGLRenderInRect(rect, tX);
+    
+    if (self.clipWhenTransformed) {
+        glDisable(GL_STENCIL_TEST);
+    }
+    WDCheckGLError();
+    
+}
+
+#pragma mark 根据mask进行‘位块传输’
+- (void) blit:(GLfloat *)proj withMask:(GLuint)maskTexture color:(WDColor *)color
+{
+    NSLog(@"Layer: blit withMask");
+    // use shader program
+    WDShader *blitShader = [self.painting getShader:@"blitWithMask"];
+    glUseProgram(blitShader.program);
+    
+    glUniformMatrix4fv([blitShader locationForUniform:@"modelViewProjectionMatrix"], 1, GL_FALSE, proj);
+    glUniform1i([blitShader locationForUniform:@"texture"], 0);
+    glUniform1f([blitShader locationForUniform:@"opacity"], opacity_);
+    glUniform4f([blitShader locationForUniform:@"color"], color.red, color.green, color.blue, color.alpha);
+    glUniform1i([blitShader locationForUniform:@"mask"], 1);
+    glUniform1i([blitShader locationForUniform:@"lockAlpha"], self.alphaLocked);
+    
+    // Bind the texture to be used
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, self.textureName);
+    
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, maskTexture);
+    
+    [self configureBlendMode];
+    
+    glBindVertexArrayOES(self.painting.quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    
+    // unbind VAO
+    glBindVertexArrayOES(0);
+}
+
+#pragma mark 根据erase mask进行‘位块传输’
+- (void) blit:(GLfloat *)proj withEraseMask:(GLuint)maskTexture
+{
+    NSLog(@"Layer: blit withEraseMask");
+    // use shader program
+    WDShader *blitShader = [self.painting getShader:@"blitWithEraseMask"];
+    glUseProgram(blitShader.program);
+    
+    glUniformMatrix4fv([blitShader locationForUniform:@"modelViewProjectionMatrix"], 1, GL_FALSE, proj);
+    glUniform1i([blitShader locationForUniform:@"texture"], 0);
+    glUniform1f([blitShader locationForUniform:@"opacity"], opacity_);
+    glUniform1i([blitShader locationForUniform:@"mask"], 1);
+    
+    // Bind the texture to be used
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, self.textureName);
+    
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, maskTexture);
+    
+    [self configureBlendMode];
+    
+    glBindVertexArrayOES(self.painting.quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    
+    // unbind VAO
+    glBindVertexArrayOES(0);
+}
+
 #pragma mark - 从缓冲区获取指定大小的image data
 - (NSData *) imageDataInRect:(CGRect)rect
 {
@@ -593,178 +773,6 @@ static NSString *WDVisibleKey = @"visible";
     }
 }
 
-#pragma mark - blit
-- (void) basicBlit:(GLfloat *)proj
-{
-    WDShader *blitShader = [self.painting getShader:@"blit"];
-	glUseProgram(blitShader.program);
-    
-	glUniformMatrix4fv([blitShader locationForUniform:@"modelViewProjectionMatrix"], 1, GL_FALSE, proj);
-	glUniform1i([blitShader locationForUniform:@"texture"], 0);
-	glUniform1f([blitShader locationForUniform:@"opacity"], opacity_);
-    
-    // Bind the texture to be used
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, self.textureName);
-    [self configureBlendMode];
-    
-    glBindVertexArrayOES(self.painting.quadVAO);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    
-    // unbind VAO
-    glBindVertexArrayOES(0);
-}
-
-- (void) blit:(GLfloat *)proj
-{
-    if (!CGAffineTransformIsIdentity(self.transform)) {
-        [self blit:proj withTransform:self.transform];
-        return;
-    }
-    
-    WDShader *blitShader = nil;
-    
-    if (self.colorBalance) {
-        blitShader = [self.painting getShader:@"colorBalanceBlit"];
-    } else if (self.hueSaturation) {
-        blitShader = [self.painting getShader:@"blitFromHueChromaLuma"];
-    } else {
-        blitShader = [self.painting getShader:@"blit"];
-    }
-    
-	glUseProgram(blitShader.program);
-    
-	glUniformMatrix4fv([blitShader locationForUniform:@"modelViewProjectionMatrix"], 1, GL_FALSE, proj);
-	glUniform1i([blitShader locationForUniform:@"texture"], 0);
-	glUniform1f([blitShader locationForUniform:@"opacity"], opacity_);
-    
-    if (self.colorBalance) {
-        glUniform1f([blitShader locationForUniform:@"redShift"], colorBalance_.redShift);
-        glUniform1f([blitShader locationForUniform:@"greenShift"], colorBalance_.greenShift);
-        glUniform1f([blitShader locationForUniform:@"blueShift"], colorBalance_.blueShift);
-        glUniform1i([blitShader locationForUniform:@"premultiply"], 1);
-    } else if (self.hueSaturation) {
-        glUniform1f([blitShader locationForUniform:@"hueShift"], hueSaturation_.hueShift);
-        glUniform1f([blitShader locationForUniform:@"saturationShift"], hueSaturation_.saturationShift);
-        glUniform1f([blitShader locationForUniform:@"brightnessShift"], hueSaturation_.brightnessShift);
-        glUniform1i([blitShader locationForUniform:@"premultiply"], 1);
-    }
-    
-    // Bind the texture to be used
-    glActiveTexture(GL_TEXTURE0);
-    if (self.hueSaturation) {
-        glBindTexture(GL_TEXTURE_2D, self.hueChromaLuma);
-    } else {
-        glBindTexture(GL_TEXTURE_2D, self.textureName);
-    }
-        
-    [self configureBlendMode];
-    
-    glBindVertexArrayOES(self.painting.quadVAO);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-    // unbind VAO
-    glBindVertexArrayOES(0);
-}
-
-- (void) blit:(GLfloat *)proj withTransform:(CGAffineTransform)tX
-{
-	// use shader program
-    WDShader *blitShader = [self.painting getShader:@"blit"];
-	glUseProgram(blitShader.program);
-    
-	glUniformMatrix4fv([blitShader locationForUniform:@"modelViewProjectionMatrix"], 1, GL_FALSE, proj);
-	glUniform1i([blitShader locationForUniform:@"texture"], 0);
-	glUniform1f([blitShader locationForUniform:@"opacity"], opacity_);
-    
-    // Bind the texture to be used
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, self.textureName);
-    
-    [self configureBlendMode];
-    CGRect rect = CGRectMake(0, 0, self.painting.dimensions.width, self.painting.dimensions.height);
-    
-    if (self.clipWhenTransformed) {
-        glEnable(GL_STENCIL_TEST);
-        glClearStencil(0);
-        glClear(GL_STENCIL_BUFFER_BIT);
-        
-        // All drawing commands fail the stencil test, and are not drawn, but increment the value in the stencil buffer.
-        glStencilFunc(GL_NEVER, 0, 0);
-        glStencilOp(GL_INCR, GL_INCR, GL_INCR);
-        
-        WDGLRenderInRect(rect, CGAffineTransformIdentity);
-        
-        // now, allow drawing, except where the stencil pattern is 0x1 and do not make any further changes to the stencil buffer
-        glStencilFunc(GL_EQUAL, 1, 1);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-    }
-    
-    WDGLRenderInRect(rect, tX);
-    
-    if (self.clipWhenTransformed) {
-        glDisable(GL_STENCIL_TEST);
-    }
-    WDCheckGLError();
-
-}
-
-- (void) blit:(GLfloat *)proj withMask:(GLuint)maskTexture color:(WDColor *)color
-{
-	// use shader program
-    WDShader *blitShader = [self.painting getShader:@"blitWithMask"];
-	glUseProgram(blitShader.program);
-    
-	glUniformMatrix4fv([blitShader locationForUniform:@"modelViewProjectionMatrix"], 1, GL_FALSE, proj);
-	glUniform1i([blitShader locationForUniform:@"texture"], 0);
-	glUniform1f([blitShader locationForUniform:@"opacity"], opacity_);
-	glUniform4f([blitShader locationForUniform:@"color"], color.red, color.green, color.blue, color.alpha);
-    glUniform1i([blitShader locationForUniform:@"mask"], 1);
-    glUniform1i([blitShader locationForUniform:@"lockAlpha"], self.alphaLocked);
-    
-    // Bind the texture to be used
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, self.textureName);
-                                  
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, maskTexture);
-    
-    [self configureBlendMode];
-    
-    glBindVertexArrayOES(self.painting.quadVAO);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    
-    // unbind VAO
-    glBindVertexArrayOES(0);
-}
-
-- (void) blit:(GLfloat *)proj withEraseMask:(GLuint)maskTexture
-{
-	// use shader program
-    WDShader *blitShader = [self.painting getShader:@"blitWithEraseMask"];
-	glUseProgram(blitShader.program);
-    
-	glUniformMatrix4fv([blitShader locationForUniform:@"modelViewProjectionMatrix"], 1, GL_FALSE, proj);
-	glUniform1i([blitShader locationForUniform:@"texture"], 0);
-	glUniform1f([blitShader locationForUniform:@"opacity"], opacity_);
-    glUniform1i([blitShader locationForUniform:@"mask"], 1);
-    
-    // Bind the texture to be used
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, self.textureName);
-    
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, maskTexture);
-    
-    [self configureBlendMode];
-    
-    glBindVertexArrayOES(self.painting.quadVAO);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    
-    // unbind VAO
-    glBindVertexArrayOES(0);
-}
-
 #pragma mark - modify
 - (void) modifyWithBlock:(void (^)())modifyBlock newTexture:(BOOL)useNewTexture undoBits:(BOOL)undo
 {
@@ -816,6 +824,7 @@ static NSString *WDVisibleKey = @"visible";
     }
 }
 
+#pragma mark 复制一个layer
 - (void) duplicateLayer:(WDLayer *)layer copyThumbnail:(BOOL)copyThumbnail
 {   
     [self modifyWithBlock:^{

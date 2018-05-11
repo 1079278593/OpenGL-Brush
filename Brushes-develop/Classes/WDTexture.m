@@ -101,14 +101,14 @@ static BOOL powerOf2(int x)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, canMipMap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
         
         // indicate that pixel rows are tightly packed (defaults to stride of 4 which is only good for RGBA or FLOAT data types)
-        glPixelStorei(GL_UNPACK_ALIGNMENT, unpackAlignment_);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, unpackAlignment_);//打包
         
         // Allocate and load image data into texture
         glTexImage2D(GL_TEXTURE_2D, 0, format_, width_, height_, 0, format_, type_, data_);
         WDCheckGLError();
 
         if (canMipMap) {
-            glGenerateMipmap(GL_TEXTURE_2D);
+            glGenerateMipmap(GL_TEXTURE_2D);//生成mip贴图
             WDCheckGLError();
         }
     }

@@ -5,7 +5,7 @@ precision highp float;
 uniform mat4 modelViewProjectionMatrix;
 
 #if __VERSION__ >= 140
-in vec4  inPosition;  
+in vec4  inPosition;
 in vec2  inTexcoord;
 in float alpha;
 out vec2 varTexcoord;

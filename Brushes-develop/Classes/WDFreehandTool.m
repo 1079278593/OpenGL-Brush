@@ -124,6 +124,7 @@
     }
 }
 
+#pragma mark 手势
 - (void) gestureBegan:(WDPanGestureRecognizer *)recognizer
 {    
     [super gestureBegan:recognizer];

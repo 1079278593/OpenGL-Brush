@@ -577,12 +577,12 @@ static NSString *previewFilename = @"image.jpg";
 {
     lastAutoSave_ = [NSDate date];
     if (![self hasUnsavedChanges]) {
-        WDLog(@"Autosave skipped, no changes");
+        WDLog(@"WDDocument:Autosave skipped, no changes");
     }
     if (gesture_) {
-        WDLog(@"Autosave prevented due to gesture");
+        WDLog(@"WDDocument:Autosave prevented due to gesture");
     } else {
-        WDLog(@"Autosave");
+        WDLog(@"WDDocument:Autosave");
         [super autosaveWithCompletionHandler:completionHandler];
     }
 }

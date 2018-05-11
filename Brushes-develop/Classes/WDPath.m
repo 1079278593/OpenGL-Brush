@@ -35,6 +35,12 @@ NSString *WDColorKey = @"color";
 NSString *WDBrushIDKey = @"brush-id";
 NSString *WDScaleKey = @"scale";
 
+/*************************/
+typedef struct {
+    GLfloat     x, y;
+    GLfloat     s, t;
+    GLfloat     a;
+} vertexData;
 
 /**************************
  * WDPath
@@ -50,6 +56,7 @@ NSString *WDScaleKey = @"scale";
 @synthesize action;
 @synthesize scale = scale_;
 
+#pragma mark - Life Cycle
 - (id) init
 {
     self = [super init];
@@ -82,11 +89,110 @@ NSString *WDScaleKey = @"scale";
     return self;
 }
 
+- (id) initWithRect:(CGRect)rect
+{
+    self = [self init];
+    
+    if (!self) {
+        return nil;
+    }
+    
+    // instantiate nodes for each corner
+    
+    [nodes_ addObject:[WDBezierNode bezierNodeWithAnchorPoint:[WD3DPoint pointWithX:CGRectGetMinX(rect) y:CGRectGetMinY(rect) z:1.0f]]];
+    [nodes_ addObject:[WDBezierNode bezierNodeWithAnchorPoint:[WD3DPoint pointWithX:CGRectGetMaxX(rect) y:CGRectGetMinY(rect) z:1.0f]]];
+    [nodes_ addObject:[WDBezierNode bezierNodeWithAnchorPoint:[WD3DPoint pointWithX:CGRectGetMaxX(rect) y:CGRectGetMaxY(rect) z:1.0f]]];
+    [nodes_ addObject:[WDBezierNode bezierNodeWithAnchorPoint:[WD3DPoint pointWithX:CGRectGetMinX(rect) y:CGRectGetMaxY(rect) z:1.0f]]];
+    
+    self.closed = YES;
+    bounds_ = rect;
+    
+    return self;
+}
+
+- (id) initWithOvalInRect:(CGRect)rect
+{
+    self = [self init];
+    
+    if (!self) {
+        return nil;
+    }
+    
+    // instantiate nodes for each corner
+    float minX = CGRectGetMinX(rect);
+    float midX = CGRectGetMidX(rect);
+    float maxX = CGRectGetMaxX(rect);
+    
+    float minY = CGRectGetMinY(rect);
+    float midY = CGRectGetMidY(rect);
+    float maxY = CGRectGetMaxY(rect);
+    
+    WD3DPoint *xDelta = [WD3DPoint pointWithX:(maxX - midX) * circleFactor y:0 z:1];
+    WD3DPoint *yDelta = [WD3DPoint pointWithX:0 y:(maxY - midY) * circleFactor z:1];
+    
+    WD3DPoint *anchor = [WD3DPoint pointWithX:minX y:midY z:1.0];
+    WDBezierNode *node = [WDBezierNode bezierNodeWithInPoint:[anchor add:yDelta]
+                                                 anchorPoint:anchor
+                                                    outPoint:[anchor subtract:yDelta]];
+    [nodes_ addObject:node];
+    
+    anchor = [WD3DPoint pointWithX:midX y:minY z:1.0];
+    node = [WDBezierNode bezierNodeWithInPoint:[anchor subtract:xDelta]
+                                   anchorPoint:anchor
+                                      outPoint:[anchor add:xDelta]];
+    [nodes_ addObject:node];
+    
+    anchor = [WD3DPoint pointWithX:maxX y:midY z:1.0];
+    node = [WDBezierNode bezierNodeWithInPoint:[anchor subtract:yDelta]
+                                   anchorPoint:anchor
+                                      outPoint:[anchor add:yDelta]];
+    [nodes_ addObject:node];
+    
+    anchor = [WD3DPoint pointWithX:midX y:maxY z:1.0];
+    node = [WDBezierNode bezierNodeWithInPoint:[anchor add:xDelta]
+                                   anchorPoint:anchor
+                                      outPoint:[anchor subtract:xDelta]];
+    [nodes_ addObject:node];
+    
+    self.closed = YES;
+    bounds_ = rect;
+    
+    return self;
+}
+
+- (id) initWithStart:(CGPoint)start end:(CGPoint)end
+{
+    self = [self init];
+    
+    if (!self) {
+        return nil;
+    }
+    
+    [nodes_ addObject:[WDBezierNode bezierNodeWithAnchorPoint:[WD3DPoint pointWithX:start.x y:start.y z:1.0]]];
+    [nodes_ addObject:[WDBezierNode bezierNodeWithAnchorPoint:[WD3DPoint pointWithX:end.x y:end.y z:1.0]]];
+    
+    boundsDirty_ = YES;
+    
+    return self;
+}
+
+- (id) copyWithZone:(NSZone *)zone
+{
+    WDPath *path = [[WDPath alloc] init];
+    
+    path->nodes_ = [nodes_ copy];
+    path->closed_ = closed_;
+    path->boundsDirty_ = YES;
+    
+    return path;
+}
+
 - (void) dealloc
 {
     CGPathRelease(pathRef_);
 }
 
+#pragma mark - 解码
 - (NSMutableArray *) decodeLegacyNodesA:(NSArray *)nodeList v1:(BOOL)v1
 {
     NSMutableArray *nodes = [NSMutableArray arrayWithCapacity:(nodeList.count / 9)];
@@ -235,6 +341,7 @@ NSString *WDScaleKey = @"scale";
     return reversed;
 }
 
+#pragma mark - path
 - (CGPathRef) pathRef
 {
     if (nodes_.count == 0) {
@@ -293,130 +400,7 @@ NSString *WDScaleKey = @"scale";
     return path;
 }
 
-- (id) initWithRect:(CGRect)rect
-{
-    self = [self init];
-    
-    if (!self) {
-        return nil;
-    }
-    
-    // instantiate nodes for each corner
-    
-    [nodes_ addObject:[WDBezierNode bezierNodeWithAnchorPoint:[WD3DPoint pointWithX:CGRectGetMinX(rect) y:CGRectGetMinY(rect) z:1.0f]]];
-    [nodes_ addObject:[WDBezierNode bezierNodeWithAnchorPoint:[WD3DPoint pointWithX:CGRectGetMaxX(rect) y:CGRectGetMinY(rect) z:1.0f]]];
-    [nodes_ addObject:[WDBezierNode bezierNodeWithAnchorPoint:[WD3DPoint pointWithX:CGRectGetMaxX(rect) y:CGRectGetMaxY(rect) z:1.0f]]];
-    [nodes_ addObject:[WDBezierNode bezierNodeWithAnchorPoint:[WD3DPoint pointWithX:CGRectGetMinX(rect) y:CGRectGetMaxY(rect) z:1.0f]]];
-    
-    self.closed = YES;
-    bounds_ = rect;
-    
-    return self;
-}
-
-- (id) initWithOvalInRect:(CGRect)rect
-{
-    self = [self init];
-    
-    if (!self) {
-        return nil;
-    }
-    
-    // instantiate nodes for each corner
-    float minX = CGRectGetMinX(rect);
-    float midX = CGRectGetMidX(rect);
-    float maxX = CGRectGetMaxX(rect);
-    
-    float minY = CGRectGetMinY(rect);
-    float midY = CGRectGetMidY(rect);
-    float maxY = CGRectGetMaxY(rect);
-    
-    WD3DPoint *xDelta = [WD3DPoint pointWithX:(maxX - midX) * circleFactor y:0 z:1];
-    WD3DPoint *yDelta = [WD3DPoint pointWithX:0 y:(maxY - midY) * circleFactor z:1];
-    
-    WD3DPoint *anchor = [WD3DPoint pointWithX:minX y:midY z:1.0];
-    WDBezierNode *node = [WDBezierNode bezierNodeWithInPoint:[anchor add:yDelta]
-                                                 anchorPoint:anchor
-                                                    outPoint:[anchor subtract:yDelta]];
-    [nodes_ addObject:node];
-      
-    anchor = [WD3DPoint pointWithX:midX y:minY z:1.0];
-    node = [WDBezierNode bezierNodeWithInPoint:[anchor subtract:xDelta]
-                                   anchorPoint:anchor
-                                      outPoint:[anchor add:xDelta]];
-    [nodes_ addObject:node];
-    
-    anchor = [WD3DPoint pointWithX:maxX y:midY z:1.0];
-    node = [WDBezierNode bezierNodeWithInPoint:[anchor subtract:yDelta]
-                                   anchorPoint:anchor
-                                      outPoint:[anchor add:yDelta]];
-    [nodes_ addObject:node];
-    
-    anchor = [WD3DPoint pointWithX:midX y:maxY z:1.0];
-    node = [WDBezierNode bezierNodeWithInPoint:[anchor add:xDelta]
-                                   anchorPoint:anchor
-                                      outPoint:[anchor subtract:xDelta]];
-    [nodes_ addObject:node];
-    
-    self.closed = YES;
-    bounds_ = rect;
-    
-    return self;
-}
-
-- (id) initWithStart:(CGPoint)start end:(CGPoint)end
-{
-    self = [self init];
-    
-    if (!self) {
-        return nil;
-    }
-    
-    [nodes_ addObject:[WDBezierNode bezierNodeWithAnchorPoint:[WD3DPoint pointWithX:start.x y:start.y z:1.0]]];
-    [nodes_ addObject:[WDBezierNode bezierNodeWithAnchorPoint:[WD3DPoint pointWithX:end.x y:end.y z:1.0]]];
-    
-    boundsDirty_ = YES;
-    
-    return self;
-}
-
-- (void) setClosedQuiet:(BOOL)closed
-{
-    if (closed && nodes_.count < 2) {
-        // need at least 2 nodes to close a path
-        return;
-    }
-    
-    if (closed) {
-        // if the first and last node have the same anchor, one is redundant
-        WDBezierNode *first = [self firstNode];
-        WDBezierNode *last = [self lastNode];
-        if ([first.anchorPoint isEqual:last.anchorPoint]) {
-            WDBezierNode *closedNode = [WDBezierNode bezierNodeWithInPoint:last.inPoint anchorPoint:first.anchorPoint outPoint:first.outPoint];
-            
-            NSMutableArray *newNodes = [NSMutableArray arrayWithArray:nodes_];
-            newNodes[0] = closedNode;
-            [newNodes removeLastObject];
-            
-            self.nodes = newNodes;
-        }
-    }
-    
-    closed_ = closed;
-}
-
-- (void) setClosed:(BOOL)closed
-{
-    if (closed && nodes_.count < 2) {
-        // need at least 2 nodes to close a path
-        return;
-    }
-    
-    [self setClosedQuiet:closed];
-    
-    [self invalidatePath];
-}
-
+#pragma mark - node
 - (void) addNode:(WDBezierNode *)node
 {
     [self.nodes addObject:node];
@@ -440,6 +424,7 @@ NSString *WDScaleKey = @"scale";
     boundsDirty_ = YES;
 }
 
+#pragma mark - bounds
 - (void) computeBounds
 {
     bounds_ = CGPathGetPathBoundingBox(self.pathRef);
@@ -499,17 +484,6 @@ NSString *WDScaleKey = @"scale";
     }
     
     return nodesInRect;
-}
-
-- (void) setNodes:(NSMutableArray *)nodes
-{
-    if ([nodes_ isEqualToArray:nodes]) {
-        return;
-    }
-    
-    nodes_ = nodes;
-    
-    [self invalidatePath];
 }
 
 - (void) transform:(CGAffineTransform)transform
@@ -572,6 +546,7 @@ NSString *WDScaleKey = @"scale";
     self.nodes = newNodes;
 }
 
+#pragma mark 平面化
 - (NSArray *) flattenedPoints
 {
     if (self.nodes.count == 1) {
@@ -606,25 +581,8 @@ NSString *WDScaleKey = @"scale";
     self.nodes = newNodes;
 }
 
-- (id) copyWithZone:(NSZone *)zone
-{       
-    WDPath *path = [[WDPath alloc] init];
-    
-    path->nodes_ = [nodes_ copy];
-    path->closed_ = closed_;
-    path->boundsDirty_ = YES;
-
-    return path;
-}
-
-/*************************/
 
 
-typedef struct {
-    GLfloat     x, y;
-    GLfloat     s, t;
-    GLfloat     a;
-} vertexData;
 
 - (CGRect) drawData
 {
@@ -639,11 +597,17 @@ typedef struct {
         float alpha = [alphas_[i] floatValue];
         
         CGRect rect = CGRectMake(result.x - size, result.y - size, size*2, size*2);
-        CGPoint a = CGPointMake(CGRectGetMinX(rect), CGRectGetMinY(rect));
-        CGPoint b = CGPointMake(CGRectGetMaxX(rect), CGRectGetMinY(rect));
-        CGPoint c = CGPointMake(CGRectGetMinX(rect), CGRectGetMaxY(rect));
-        CGPoint d = CGPointMake(CGRectGetMaxX(rect), CGRectGetMaxY(rect));
+        CGPoint a = CGPointMake(CGRectGetMinX(rect), CGRectGetMinY(rect));//左上角
+        CGPoint b = CGPointMake(CGRectGetMaxX(rect), CGRectGetMinY(rect));//右上角
+        CGPoint c = CGPointMake(CGRectGetMinX(rect), CGRectGetMaxY(rect));//左下角
+        CGPoint d = CGPointMake(CGRectGetMaxX(rect), CGRectGetMaxY(rect));//右下角
         
+        /**
+         CGAffineTransformMakeTranslation实现以初始位置为基准,在x轴方向上平移x单位,在y轴方向上平移y单位
+         CGAffineTransformTranslate实现以一个已经存在的形变为基准,在x轴方向上平移x单位,在y轴方向上平移y单位
+         CGPoint CGPointApplyAffineTransform(CGPoint point, CGAffineTransform t)某点通过矩阵变换之后的点
+         CGRectApplyAffineTransform
+        */
         CGAffineTransform t = CGAffineTransformMakeTranslation(WDCenterOfRect(rect).x, WDCenterOfRect(rect).y);
         t = CGAffineTransformRotate(t, angle);
         t = CGAffineTransformTranslate(t, -WDCenterOfRect(rect).x, -WDCenterOfRect(rect).y);
@@ -705,6 +669,13 @@ typedef struct {
         }
     }
     
+    /**
+     glVertexAttribPointer (GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr)
+     顶点属性索引、属性分量数量、类型、规范化、指定位移大小、数据指针
+     这里GLuint indx绑定的0、1、2，要和shader初始化时，绑定的indx对应
+     
+     glEnableVertexAttribArray (GLuint index)  索引
+     */
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(vertexData), &vertexD[0].x);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_TRUE, sizeof(vertexData), &vertexD[0].s);
@@ -719,11 +690,7 @@ typedef struct {
     return dataBounds;
 }
 
-- (WDRandom *) newRandomizer
-{
-    return [[WDRandom alloc] initWithSeed:self.brush.generator.seed];
-}
-
+#pragma mark - 绘制图章
 - (void) paintStamp:(WDRandom *)randomizer
 {
     WDBrush         *brush = self.brush;
@@ -742,13 +709,14 @@ typedef struct {
     [alphas_ addObject:@(alpha)];
 }
 
+#pragma mark 根据点来绘制
 - (void) paintFromPoint:(WD3DPoint *)lastLocation toPoint:(WD3DPoint *)location randomizer:(WDRandom *)randomizer
 {
-    float           pA = lastLocation.z;
+    float           pA = lastLocation.z;//z值,赋值给pressure
     float           pB = location.z;
     float           pDelta = (pB - pA);
-	float           f, distance = WDDistance(lastLocation.CGPoint, location.CGPoint);
-	CGPoint         vector = WDSubtractPoints(location.CGPoint, lastLocation.CGPoint);
+	float           f, distance = WDDistance(lastLocation.CGPoint, location.CGPoint);//两点的距离
+	CGPoint         vector = WDSubtractPoints(location.CGPoint, lastLocation.CGPoint);//x轴和y轴相对距离
 	CGPoint         unitVector = CGPointMake(1.0f, 1.0f);
 	float           vectorAngle = atan2(vector.y, vector.x);
 	float           step, pressureStep, pressure = pA;
@@ -756,26 +724,28 @@ typedef struct {
     float           weight = scale_ * (self.limitBrushSize ? 50 : brush.weight.value);
     
 	if (distance > 0.0f) {
-		unitVector = WDMultiplyPointScalar(vector, 1.0f / distance);
+		unitVector = WDMultiplyPointScalar(vector, 1.0f / distance);//单位向量
 	}
     
+    //起始点 如果remainder_为0，则值为lastLocation的值，否则加上remainder_的值作为偏移量
+//    NSLog(@"WDPath 循环前，remainder_%f",remainder_);
 	CGPoint start = WDAddPoints(lastLocation.CGPoint, WDMultiplyPointScalar(unitVector, remainder_));
     
-	// step linearly from last to current, pasting brush image
+	// step linearly from last to current, pasting brush image。翻译：从last到current,线性‘粘贴’笔刷图片
 	for (f = remainder_; f <= distance; f += step, pressure += pressureStep) {
         
         int sign = signbit(brush.weightDynamics.value);
-        float p = sign ? pressure : (1.0f - pressure);
-        float brushSize = MAX(1, weight - fabs(brush.weightDynamics.value) * p * weight);
+        float p = sign ? pressure : (1.0f - pressure);//压力，按压屏幕力度？
+        float brushSize = MAX(1, weight - fabs(brush.weightDynamics.value) * p * weight);//笔刷大小
         
-        float rotationalScatter = [randomizer nextFloat] * brush.rotationalScatter.value * M_PI * 2;
-        float angleOffset = brush.angle.value * (M_PI / 180.0f);
+        float rotationalScatter = [randomizer nextFloat] * brush.rotationalScatter.value * M_PI * 2;//旋转散射
+        float angleOffset = brush.angle.value * (M_PI / 180.0f);//角度旋转
         
-        float positionalScatter = [randomizer nextFloatMin:-1.0f max:1.0f];
+        float positionalScatter = [randomizer nextFloatMin:-1.0f max:1.0f];//位置散射、点散射
         positionalScatter *= brush.positionalScatter.value;
-        CGPoint orthog;
+        CGPoint orthog;//orthogon矩形或者长方形，ortho正交
         orthog.x = unitVector.y;
-        orthog.y = -unitVector.x;
+        orthog.y = -unitVector.x;//x和y位置互换
         orthog = WDMultiplyPointScalar(orthog, weight / 2.0f * positionalScatter);
         CGPoint pos = WDAddPoints(start, orthog);
         
@@ -783,21 +753,29 @@ typedef struct {
         p = sign ? pressure : (1.0f - pressure);
         float alpha = MAX(0.01, brush.intensity.value - fabs(brush.intensityDynamics.value) * p * brush.intensity.value);
         
+        //最终设置下面4个值
         [points_ addObject:[NSValue valueWithCGPoint:pos]];
         [sizes_ addObject:@(brushSize)];
         [angles_ addObject:@(vectorAngle * brush.angleDynamics.value + rotationalScatter + angleOffset)];
         [alphas_ addObject:@(alpha)];
         
+        //准备下一个循环
         step = MAX(1.0, brush.spacing.value * brushSize);
         start = WDAddPoints(start, WDMultiplyPointScalar(unitVector, step));
 		pressureStep = pDelta / (distance / step);
     }
     
-    // how much extra spacing should we add when we paint the next time?
-    // this keeps the spacing uniform across move events
+    /**
+     how much extra spacing should we add when we paint the next time?
+     下一次油漆时，我们应该增加多少额外的间距?
+     this keeps the spacing uniform across move events
+     这样可以保持间隔均匀。
+     */
     remainder_ = (f - distance);
+//    NSLog(@"WDPath 循环后，remainder_%f",remainder_);
 }
 
+#pragma mark external call
 - (CGRect) paint:(WDRandom *)randomizer
 {    
     if (!points_) {
@@ -817,7 +795,7 @@ typedef struct {
     } else {
         NSArray     *points = [self flattenedPoints];
         NSInteger   numPoints = points.count;
-        
+        NSLog(@"绘制点数:%ld",(long)numPoints);
         for (NSInteger ix = 0; ix < numPoints - 1; ix++) {
             [self paintFromPoint:points[ix] toPoint:points[ix+1] randomizer:randomizer];
         }
@@ -826,6 +804,7 @@ typedef struct {
     return [self drawData];
 }
 
+#pragma mark - Getter And Setter
 - (void) setBrush:(WDBrush *)brush
 {    
     brush_ = brush;
@@ -840,6 +819,59 @@ typedef struct {
 {
     [self transform:CGAffineTransformMakeScale(scale / scale_, scale / scale_)];
     scale_ = scale;
+}
+
+- (void) setClosedQuiet:(BOOL)closed
+{
+    if (closed && nodes_.count < 2) {
+        // need at least 2 nodes to close a path
+        return;
+    }
+    
+    if (closed) {
+        // if the first and last node have the same anchor, one is redundant
+        WDBezierNode *first = [self firstNode];
+        WDBezierNode *last = [self lastNode];
+        if ([first.anchorPoint isEqual:last.anchorPoint]) {
+            WDBezierNode *closedNode = [WDBezierNode bezierNodeWithInPoint:last.inPoint anchorPoint:first.anchorPoint outPoint:first.outPoint];
+            
+            NSMutableArray *newNodes = [NSMutableArray arrayWithArray:nodes_];
+            newNodes[0] = closedNode;
+            [newNodes removeLastObject];
+            
+            self.nodes = newNodes;
+        }
+    }
+    
+    closed_ = closed;
+}
+
+- (void) setClosed:(BOOL)closed
+{
+    if (closed && nodes_.count < 2) {
+        // need at least 2 nodes to close a path
+        return;
+    }
+    
+    [self setClosedQuiet:closed];
+    
+    [self invalidatePath];
+}
+
+- (void) setNodes:(NSMutableArray *)nodes
+{
+    if ([nodes_ isEqualToArray:nodes]) {
+        return;
+    }
+    
+    nodes_ = nodes;
+    
+    [self invalidatePath];
+}
+
+- (WDRandom *) newRandomizer
+{
+    return [[WDRandom alloc] initWithSeed:self.brush.generator.seed];
 }
 
 @end

@@ -117,6 +117,7 @@
 
 - (void) present
 {
+    NSLog(@"GLRegion: present");
     glBindFramebuffer(GL_FRAMEBUFFER, self.framebuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, self.renderbuffer);
     [self.context presentRenderbuffer:GL_RENDERBUFFER];

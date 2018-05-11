@@ -166,26 +166,6 @@ NSString *WDActiveLayerChangedNotification = @"WDActiveLayerChangedNotification"
     return painting;
 }
 
-#pragma mark - 通知相关操作：阻止
-- (void) beginSuppressingNotifications
-{
-    suppressNotifications_++;
-}
-
-- (void) endSuppressingNotifications
-{
-    suppressNotifications_--;
-    
-    if (suppressNotifications_ < 0) {
-        NSLog(@"Unbalanced notification suppression: %d", (int) suppressNotifications_);
-    }
-}
-
-- (BOOL) isSuppressingNotifications
-{
-    return (suppressNotifications_ > 0) ? YES : NO;
-}
-
 #pragma mark - 着色器
 - (void) loadShaders
 {
@@ -275,6 +255,239 @@ NSString *WDActiveLayerChangedNotification = @"WDActiveLayerChangedNotification"
     }
     
     return quadVAO_;
+}
+
+#pragma mark - 笔刷
+- (void) reloadBrush
+{
+    [EAGLContext setCurrentContext:self.context];
+    
+    [brushTexture_ freeGLResources];
+    brushTexture_ = nil;
+}
+
+#pragma mark 根据WDBrush生成笔刷纹理
+- (WDTexture *) brushTexture:(WDBrush *)brush
+{
+    NSLog(@"Paint: 生成笔刷纹理");
+    [EAGLContext setCurrentContext:self.context];
+    
+    if (!brushTexture_ || (brush != lastBrush_)) {
+        WDStampGenerator *gen = brush.generator;
+        
+        if (brushTexture_) {
+            [brushTexture_ freeGLResources];//删除之前绑定的纹理：glDeleteTextures()
+        }
+        
+        brushTexture_ = [WDTexture alphaTextureWithImage:gen.stamp];
+        lastBrush_ = brush;
+    }
+    
+    return brushTexture_;
+}
+
+#pragma mark 根据WDBrush配置笔刷
+- (void) configureBrush:(WDBrush *)brush
+{
+    NSLog(@"Paint: 配置笔刷");
+    WDShader *brushShader = [self getShader:@"brush"];
+    glUseProgram(brushShader.program);
+    
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, [self brushTexture:brush].textureName);
+    
+    //modelViewProjectionMatrix：模型视图投影矩阵，MVP；作用变换位置
+    glUniform1i([brushShader locationForUniform:@"texture"], 0);//采样器：GL_TEXTURE0 -> 0
+    glUniformMatrix4fv([brushShader locationForUniform:@"modelViewProjectionMatrix"], 1, GL_FALSE, projection_);
+    WDCheckGLError();
+}
+
+- (GLuint) reusableFramebuffer
+{
+    if (!reusableFramebuffer) {
+        glGenFramebuffers(1, &reusableFramebuffer);
+    }
+    
+    return reusableFramebuffer;
+}
+
+#pragma mark - 根据路径绘制
+- (CGRect) paintStroke:(WDPath *)path randomizer:(WDRandom *)randomizer clear:(BOOL)clearBuffer
+{
+    //画笔绘制的开始
+    NSLog(@"Paint: paintStroke");
+    self.activePath = path;
+    
+    CGRect pathBounds = CGRectZero;
+    [EAGLContext setCurrentContext:self.context];
+    
+    
+    glBindFramebuffer(GL_FRAMEBUFFER, self.reusableFramebuffer);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, self.activePaintTexture, 0);
+    GLuint status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    
+    if (status == GL_FRAMEBUFFER_COMPLETE) {
+        glViewport(0, 0, self.width, self.height);
+        
+        if (clearBuffer) {
+            glClearColor(0, 0, 0, 0);
+            glClear(GL_COLOR_BUFFER_BIT);
+        }
+        
+        [self configureBrush:path.brush];
+        pathBounds = [path paint:randomizer];
+    }
+    
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    WDCheckGLError();
+    
+    NSDictionary *userInfo = @{@"rect": [NSValue valueWithCGRect:pathBounds]};
+    [[NSNotificationCenter defaultCenter] postNotificationName:WDStrokeAddedNotification object:self userInfo:userInfo];
+    
+    return pathBounds;
+}
+
+#pragma mark 笔画
+- (void) forgetStroke:(WDPath *)path
+{
+    [[undoManager_ prepareWithInvocationTarget:self] recordStroke:path];
+    
+    [self.brushes removeObject:path.brush];
+    if (![self.brushes containsObject:path.brush]) {
+        [self.undoneBrushes addObject:path.brush];
+    }
+    [self.colors removeObject:path.color];
+    --self.strokeCount;
+}
+
+- (void) recordStroke:(WDPath *)path
+{
+    [[undoManager_ prepareWithInvocationTarget:self] forgetStroke:path];
+    
+    [self.brushes addObject:path.brush];
+    [self.undoneBrushes removeObject:path.brush];
+    [self.colors addObject:path.color];
+    ++self.strokeCount;
+}
+
+#pragma mark 设置平面化模式
+- (void) setFlattenMode:(BOOL)inFlattenMode
+{
+    if (inFlattenMode && self.layers.count == 1) {
+        // this is counter-productive if we only have one layer
+        flattenedIsDirty = NO;
+        
+        if (flattenedTexture) {
+            glDeleteTextures(1, &flattenedTexture);
+            flattenedTexture = 0;
+        }
+        
+        flattenMode = NO;
+        return;
+    }
+    
+    flattenMode = inFlattenMode;
+    
+    if (flattenMode && (flattenedIsDirty || !flattenedTexture)) {
+        if (!flattenedTexture) {
+            flattenedTexture = [self generateTexture:NULL deepColor:NO];
+        }
+        
+        // make sure the painting's context is current
+        [EAGLContext setCurrentContext:self.context];
+        
+        GLuint framebuffer;
+        glGenFramebuffers(1, &framebuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, flattenedTexture, 0);
+        GLint status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        
+        if (status == GL_FRAMEBUFFER_COMPLETE) {
+            glViewport(0, 0, self.width, self.height);
+            
+            glClearColor(1, 1, 1, 1);
+            glClear(GL_COLOR_BUFFER_BIT);
+            
+            // blit each layer
+            for (WDLayer *layer in self.layers) {
+                if (layer.visible) {
+                    [layer basicBlit:projection_];
+                }
+            }
+        } else {
+            NSLog(@"-[WDPainting setFlattenMode:]: Incomplete Framebuffer!");
+        }
+        
+        flattenedIsDirty = NO;
+        glDeleteFramebuffers(1, &framebuffer);
+    }
+}
+
+#pragma mark blit:位块传输，平面化纹理
+- (void) blitFlattenedTexture:(GLfloat *)projection
+{
+    // use shader program
+    WDShader *blitShader = [self getShader:@"straightBlit"];
+    glUseProgram(blitShader.program);
+    
+    glUniformMatrix4fv([blitShader locationForUniform:@"modelViewProjectionMatrix"], 1, GL_FALSE, projection);
+    glUniform1i([blitShader locationForUniform:@"texture"], 0);
+    
+    // Bind the texture to be used
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, flattenedTexture);
+    
+    glBindVertexArrayOES(self.quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    
+    // unbind VAO
+    glBindVertexArrayOES(0);
+}
+
+- (void) blit:(GLfloat *)projection
+{
+    NSLog(@"Paint: blit");
+    if (self.flattenMode) {
+        [self blitFlattenedTexture:projection];
+        return;
+    }
+    
+    for (WDLayer *layer in self.layers) {
+        if (!layer.visible) {
+            continue;
+        }
+        
+        if (self.activeLayer == layer && self.activePath) {
+            if (self.activePath.action == WDPathActionErase) {
+                [layer blit:projection withEraseMask:self.activePaintTexture];
+            } else {
+                [layer blit:projection withMask:self.activePaintTexture color:self.activePath.color];
+            }
+        } else {
+            [layer blit:projection];
+        }
+    }
+}
+
+#pragma mark - 通知相关操作：阻止
+- (void) beginSuppressingNotifications
+{
+    suppressNotifications_++;
+}
+
+- (void) endSuppressingNotifications
+{
+    suppressNotifications_--;
+    
+    if (suppressNotifications_ < 0) {
+        NSLog(@"Unbalanced notification suppression: %d", (int) suppressNotifications_);
+    }
+}
+
+- (BOOL) isSuppressingNotifications
+{
+    return (suppressNotifications_ > 0) ? YES : NO;
 }
 
 #pragma mark - Active layer
@@ -697,6 +910,7 @@ NSString *WDActiveLayerChangedNotification = @"WDActiveLayerChangedNotification"
     return UIImageJPEGRepresentation(image, 0.95f);
 }
 
+#pragma mark 从当前状态获取图片
 - (NSData *) PNGRepresentationForCurrentState
 {
     UIImage *image = [self imageForCurrentStateWithBackgroundColor:[UIColor clearColor]];
@@ -774,215 +988,6 @@ NSString *WDActiveLayerChangedNotification = @"WDActiveLayerChangedNotification"
     }
     
     return activePaintTexture_;
-}
-
-#pragma mark - 笔刷
-- (void) reloadBrush
-{
-    [EAGLContext setCurrentContext:self.context];
-    
-    [brushTexture_ freeGLResources];
-    brushTexture_ = nil;
-}
-
-#pragma mark 根据WDBrush生成笔刷纹理
-- (WDTexture *) brushTexture:(WDBrush *)brush
-{
-    NSLog(@"生成笔刷纹理");
-    [EAGLContext setCurrentContext:self.context];
-    
-    if (!brushTexture_ || (brush != lastBrush_)) {
-        WDStampGenerator *gen = brush.generator;
-        
-        if (brushTexture_) {
-            [brushTexture_ freeGLResources];//删除之前绑定的纹理：glDeleteTextures()
-        }
-        
-        brushTexture_ = [WDTexture alphaTextureWithImage:gen.stamp];
-        lastBrush_ = brush;
-    }
-    
-    return brushTexture_;
-}
-
-#pragma mark 根据WDBrush配置笔刷
-- (void) configureBrush:(WDBrush *)brush
-{
-    NSLog(@"配置笔刷");
-    WDShader *brushShader = [self getShader:@"brush"];
-    glUseProgram(brushShader.program);
-    
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, [self brushTexture:brush].textureName);
-    
-    glUniform1i([brushShader locationForUniform:@"texture"], 0);
-    glUniformMatrix4fv([brushShader locationForUniform:@"modelViewProjectionMatrix"], 1, GL_FALSE, projection_);
-    WDCheckGLError();
-}
-
-- (GLuint) reusableFramebuffer
-{
-    if (!reusableFramebuffer) {
-        glGenFramebuffers(1, &reusableFramebuffer);
-    }
-    
-    return reusableFramebuffer;
-}
-
-#pragma mark - 根据路径绘制
-- (CGRect) paintStroke:(WDPath *)path randomizer:(WDRandom *)randomizer clear:(BOOL)clearBuffer
-{
-    self.activePath = path;
-    
-    CGRect pathBounds = CGRectZero;
-    [EAGLContext setCurrentContext:self.context];
-    
-    
-    glBindFramebuffer(GL_FRAMEBUFFER, self.reusableFramebuffer);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, self.activePaintTexture, 0);
-    GLuint status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    
-    if (status == GL_FRAMEBUFFER_COMPLETE) {
-        glViewport(0, 0, self.width, self.height);
-        
-        if (clearBuffer) {
-            glClearColor(0, 0, 0, 0);
-            glClear(GL_COLOR_BUFFER_BIT);
-        }
-
-        [self configureBrush:path.brush];
-        pathBounds = [path paint:randomizer];
-    }
-    
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    WDCheckGLError();
-
-    NSDictionary *userInfo = @{@"rect": [NSValue valueWithCGRect:pathBounds]};
-    [[NSNotificationCenter defaultCenter] postNotificationName:WDStrokeAddedNotification object:self userInfo:userInfo];
-
-    return pathBounds;
-}
-
-#pragma mark 笔画
-- (void) forgetStroke:(WDPath *)path
-{
-    [[undoManager_ prepareWithInvocationTarget:self] recordStroke:path];    
-    
-    [self.brushes removeObject:path.brush];
-    if (![self.brushes containsObject:path.brush]) {
-        [self.undoneBrushes addObject:path.brush];
-    }
-    [self.colors removeObject:path.color];
-    --self.strokeCount;
-}
-
-- (void) recordStroke:(WDPath *)path
-{    
-    [[undoManager_ prepareWithInvocationTarget:self] forgetStroke:path];    
-
-    [self.brushes addObject:path.brush];
-    [self.undoneBrushes removeObject:path.brush];
-    [self.colors addObject:path.color];
-    ++self.strokeCount;
-}
-
-#pragma mark 设置平面化模式
-- (void) setFlattenMode:(BOOL)inFlattenMode
-{
-    if (inFlattenMode && self.layers.count == 1) {
-        // this is counter-productive if we only have one layer
-        flattenedIsDirty = NO;
-        
-        if (flattenedTexture) {
-            glDeleteTextures(1, &flattenedTexture);
-            flattenedTexture = 0;
-        }
-        
-        flattenMode = NO;
-        return;
-    }
-    
-    flattenMode = inFlattenMode;
-    
-    if (flattenMode && (flattenedIsDirty || !flattenedTexture)) {
-        if (!flattenedTexture) {
-            flattenedTexture = [self generateTexture:NULL deepColor:NO];
-        }
-        
-        // make sure the painting's context is current
-        [EAGLContext setCurrentContext:self.context];
-        
-        GLuint framebuffer;
-        glGenFramebuffers(1, &framebuffer);
-        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-        
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, flattenedTexture, 0);
-        GLint status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-        
-        if (status == GL_FRAMEBUFFER_COMPLETE) {
-            glViewport(0, 0, self.width, self.height);
-            
-            glClearColor(1, 1, 1, 1);
-            glClear(GL_COLOR_BUFFER_BIT);
-            
-            // blit each layer
-            for (WDLayer *layer in self.layers) {
-                if (layer.visible) {
-                    [layer basicBlit:projection_];
-                }
-            }
-        } else {
-            NSLog(@"-[WDPainting setFlattenMode:]: Incomplete Framebuffer!");
-        }
-
-        flattenedIsDirty = NO;
-        glDeleteFramebuffers(1, &framebuffer);
-    }
-}
-
-#pragma mark blit:位块传输，平面化纹理
-- (void) blitFlattenedTexture:(GLfloat *)projection
-{
-    // use shader program
-    WDShader *blitShader = [self getShader:@"straightBlit"];
-	glUseProgram(blitShader.program);
-    
-	glUniformMatrix4fv([blitShader locationForUniform:@"modelViewProjectionMatrix"], 1, GL_FALSE, projection);
-	glUniform1i([blitShader locationForUniform:@"texture"], 0);
-    
-    // Bind the texture to be used
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, flattenedTexture);
-    
-    glBindVertexArrayOES(self.quadVAO);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    
-    // unbind VAO
-    glBindVertexArrayOES(0);
-}
-    
-- (void) blit:(GLfloat *)projection
-{
-    if (self.flattenMode) {
-        [self blitFlattenedTexture:projection];
-        return;
-    }
-    
-    for (WDLayer *layer in self.layers) {
-        if (!layer.visible) {
-            continue;
-        }
-        
-        if (self.activeLayer == layer && self.activePath) {
-            if (self.activePath.action == WDPathActionErase) {
-                [layer blit:projection withEraseMask:self.activePaintTexture];
-            } else {
-                [layer blit:projection withMask:self.activePaintTexture color:self.activePath.color];
-            }
-        } else {
-            [layer blit:projection];
-        }
-    }
 }
 
 #pragma mark - - Selection State Management

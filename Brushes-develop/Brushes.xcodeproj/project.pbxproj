@@ -503,7 +503,7 @@
 		6B08CE3418224796001AFC3C /* merge-modern@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "merge-modern@2x.png"; path = "Images/merge-modern@2x.png"; sourceTree = "<group>"; };
 		6B11BEFD14FA9F5E00195D57 /* colorPicker.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = colorPicker.fsh; path = Shaders/colorPicker.fsh; sourceTree = "<group>"; };
 		6B13DE64146A0EBB00BD5D85 /* blit.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = blit.fsh; path = Shaders/blit.fsh; sourceTree = "<group>"; };
-		6B13DE65146A0EBB00BD5D85 /* blit.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = blit.vsh; path = Shaders/blit.vsh; sourceTree = "<group>"; };
+		6B13DE65146A0EBB00BD5D85 /* blit.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = blit.vsh; sourceTree = "<group>"; };
 		6B1505D415ACDFB700FE58DC /* WDThumbButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WDThumbButton.h; sourceTree = "<group>"; };
 		6B1505D515ACDFB700FE58DC /* WDThumbButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WDThumbButton.m; sourceTree = "<group>"; };
 		6B17A9F3155B23F2006E72FD /* WDMatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WDMatrix.h; sourceTree = "<group>"; };
@@ -1185,6 +1185,10 @@
 				6B40CDF5181FD10E00004FB2 /* WDLayer.m */,
 				6B40CE00181FD10E00004FB2 /* WDRandom.h */,
 				6B40CE01181FD10E00004FB2 /* WDRandom.m */,
+				6B40CDFA181FD10E00004FB2 /* WDPath.h */,
+				6B40CDFB181FD10E00004FB2 /* WDPath.m */,
+				6B40CDE0181FD10E00004FB2 /* WDBezierNode.h */,
+				6B40CDE1181FD10E00004FB2 /* WDBezierNode.m */,
 				6B40CE10181FD10F00004FB2 /* WDStampGenerator.h */,
 				6B40CE11181FD10F00004FB2 /* WDStampGenerator.m */,
 				6B40CDE6181FD10E00004FB2 /* WDBristleGenerator.h */,
@@ -1217,8 +1221,6 @@
 				6B40CE1B181FD10F00004FB2 /* WDZigZagGenerator.m */,
 				6B40CDDE181FD10E00004FB2 /* WD3DPoint.h */,
 				6B40CDDF181FD10E00004FB2 /* WD3DPoint.m */,
-				6B40CDE0181FD10E00004FB2 /* WDBezierNode.h */,
-				6B40CDE1181FD10E00004FB2 /* WDBezierNode.m */,
 				6B40CDE2181FD10E00004FB2 /* WDBezierSegment.h */,
 				6B40CDE3181FD10E00004FB2 /* WDBezierSegment.m */,
 				6B40CDE4181FD10E00004FB2 /* WDBlendModes.h */,
@@ -1231,8 +1233,6 @@
 				6B40CDF3181FD10E00004FB2 /* WDHueSaturation.m */,
 				6B40CE67181FD24A00004FB2 /* WDPaintingFragment.h */,
 				6B40CE68181FD24A00004FB2 /* WDPaintingFragment.m */,
-				6B40CDFA181FD10E00004FB2 /* WDPath.h */,
-				6B40CDFB181FD10E00004FB2 /* WDPath.m */,
 				6B40CE18181FD10F00004FB2 /* WDXMLElement.h */,
 				6B40CE19181FD10F00004FB2 /* WDXMLElement.m */,
 			);
@@ -1494,27 +1494,27 @@
 			isa = PBXGroup;
 			children = (
 				6B84A671146CA08800D1D093 /* Blend */,
-				6B13DE64146A0EBB00BD5D85 /* blit.fsh */,
 				6B13DE65146A0EBB00BD5D85 /* blit.vsh */,
-				6BD5959A1524C2A70014A798 /* blitFromHueChromaLuma.fsh */,
-				6BD595C0152D26020014A798 /* blitWithEraseMask.fsh */,
-				6BD3735214A01F3400C4C941 /* blitWithMask.fsh */,
-				6BF1B94B1461CD77009C4710 /* brush.fsh */,
+				6B13DE64146A0EBB00BD5D85 /* blit.fsh */,
 				6BF1B94C1461CD77009C4710 /* brush.vsh */,
-				6BD595791522C4B70014A798 /* colorBalanceBlit.fsh */,
-				6B11BEFD14FA9F5E00195D57 /* colorPicker.fsh */,
-				6BD595C2152D6E020014A798 /* compositeWithEraseMask.fsh */,
-				6BD3735514A1695A00C4C941 /* compositeWithMask.fsh */,
-				6B944B3114D0B84300E20F7C /* desaturate.fsh */,
+				6BF1B94B1461CD77009C4710 /* brush.fsh */,
+				6B9394C8145230C500305670 /* simple.vsh */,
+				6B9394CA1452321400305670 /* simple.fsh */,
 				6B5BA0F715CC8D7D00C2BFD8 /* fill.fsh */,
 				6B944B3414D0C06B00E20F7C /* invert.fsh */,
 				6B82B93714EB31D1002442CE /* merge.fsh */,
-				6B7E16C814A1C16900756C92 /* nonPremultipliedBlit.fsh */,
-				6B9394CA1452321400305670 /* simple.fsh */,
-				6B9394C8145230C500305670 /* simple.vsh */,
 				6B42CC8A15BDCBED002253F2 /* straightBlit.fsh */,
-				6BD5959B1524C2A70014A798 /* toHueChromaLuma.fsh */,
+				6B944B3114D0B84300E20F7C /* desaturate.fsh */,
+				6B11BEFD14FA9F5E00195D57 /* colorPicker.fsh */,
+				6BD3735214A01F3400C4C941 /* blitWithMask.fsh */,
+				6BD595791522C4B70014A798 /* colorBalanceBlit.fsh */,
+				6BD595C0152D26020014A798 /* blitWithEraseMask.fsh */,
 				6B7DF86B15953C1A0053AE9B /* unPremultipliedBlit.fsh */,
+				6BD5959B1524C2A70014A798 /* toHueChromaLuma.fsh */,
+				6BD3735514A1695A00C4C941 /* compositeWithMask.fsh */,
+				6B7E16C814A1C16900756C92 /* nonPremultipliedBlit.fsh */,
+				6BD5959A1524C2A70014A798 /* blitFromHueChromaLuma.fsh */,
+				6BD595C2152D6E020014A798 /* compositeWithEraseMask.fsh */,
 			);
 			name = Shaders;
 			sourceTree = "<group>";
@@ -1676,6 +1676,10 @@
 		6BCD53681240003D002FCB27 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				6BCD52DA12400017002FCB27 /* WDCanvas.h */,
+				6BCD52DB12400017002FCB27 /* WDCanvas.m */,
+				6B83521815B8F74900C6422A /* WDGLRegion.h */,
+				6B83521915B8F74900C6422A /* WDGLRegion.m */,
 				6B524DCB15AB924400975643 /* WDActionNameView.h */,
 				6B524DCC15AB924400975643 /* WDActionNameView.m */,
 				6BE9BA3915328F7D0085EBA8 /* WDActionSheet.h */,
@@ -1694,8 +1698,6 @@
 				6B82B96614F60167002442CE /* WDBrushPreview.m */,
 				6BA00E41159BB31E00AB48E7 /* WDBrushSizeOverlay.h */,
 				6BA00E42159BB31E00AB48E7 /* WDBrushSizeOverlay.m */,
-				6BCD52DA12400017002FCB27 /* WDCanvas.h */,
-				6BCD52DB12400017002FCB27 /* WDCanvas.m */,
 				6BF9986D15A776EB00AFBB3A /* WDCellSelectionView.h */,
 				6BF9986E15A776EC00AFBB3A /* WDCellSelectionView.m */,
 				6B939227144F964000305670 /* WDColorComparator.h */,
@@ -1722,8 +1724,6 @@
 				6BCD52ED12400017002FCB27 /* WDEventForwardingView.m */,
 				6BB1D0FB1309E9A300F0C22E /* WDEyedropper.h */,
 				6BB1D0FC1309E9A300F0C22E /* WDEyedropper.m */,
-				6B83521815B8F74900C6422A /* WDGLRegion.h */,
-				6B83521915B8F74900C6422A /* WDGLRegion.m */,
 				6B524DD415ABC61700975643 /* WDGridView.h */,
 				6B524DD515ABC61700975643 /* WDGridView.m */,
 				6BB7F94313AB1F5A004081B3 /* WDHueShifter.h */,

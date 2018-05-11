@@ -37,6 +37,8 @@
 		3A00A68820188F41008EEC7F /* 2-text.svg in Resources */ = {isa = PBXBuildFile; fileRef = 3A00A68020188F41008EEC7F /* 2-text.svg */; };
 		3A00A68920188F41008EEC7F /* direnjieYES.svg in Resources */ = {isa = PBXBuildFile; fileRef = 3A00A68120188F41008EEC7F /* direnjieYES.svg */; };
 		3A00A68A20188F41008EEC7F /* hand_1.png in Resources */ = {isa = PBXBuildFile; fileRef = 3A00A68220188F41008EEC7F /* hand_1.png */; };
+		3A504DAE20A0521000753B15 /* hole.png in Resources */ = {isa = PBXBuildFile; fileRef = 3A504DAD20A0521000753B15 /* hole.png */; };
+		3A504DB220A05F1700753B15 /* 21.png in Resources */ = {isa = PBXBuildFile; fileRef = 3A504DB120A05F1700753B15 /* 21.png */; };
 		3A554A152011D203002CFBEA /* UIBezierPath+Geometry.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A554A022011D203002CFBEA /* UIBezierPath+Geometry.m */; };
 		3A554A162011D203002CFBEA /* CuvbicCurveGeometry.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A554A042011D203002CFBEA /* CuvbicCurveGeometry.m */; };
 		3A554A172011D203002CFBEA /* QuadCurveGeometry.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A554A052011D203002CFBEA /* QuadCurveGeometry.m */; };
@@ -149,6 +151,8 @@
 		3A00A68020188F41008EEC7F /* 2-text.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = "2-text.svg"; sourceTree = "<group>"; };
 		3A00A68120188F41008EEC7F /* direnjieYES.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = direnjieYES.svg; sourceTree = "<group>"; };
 		3A00A68220188F41008EEC7F /* hand_1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = hand_1.png; sourceTree = "<group>"; };
+		3A504DAD20A0521000753B15 /* hole.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = hole.png; sourceTree = "<group>"; };
+		3A504DB120A05F1700753B15 /* 21.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 21.png; sourceTree = "<group>"; };
 		3A554A022011D203002CFBEA /* UIBezierPath+Geometry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIBezierPath+Geometry.m"; sourceTree = "<group>"; };
 		3A554A032011D203002CFBEA /* VectorGeometry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VectorGeometry.h; sourceTree = "<group>"; };
 		3A554A042011D203002CFBEA /* CuvbicCurveGeometry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CuvbicCurveGeometry.m; sourceTree = "<group>"; };
@@ -314,6 +318,8 @@
 			isa = PBXGroup;
 			children = (
 				3A6E2DF02093210900E01F11 /* eye.png */,
+				3A504DAD20A0521000753B15 /* hole.png */,
+				3A504DB120A05F1700753B15 /* 21.png */,
 				AF7492A91728A9E50013253B /* MainWindow.xib */,
 				AF7E203F1728A2C600728423 /* PaintingViewController.xib */,
 				AFCEBA1D11D96215001AA22A /* Icon-Small@2x.png */,
@@ -646,8 +652,10 @@
 				AFCEBA2211D96215001AA22A /* Icon-Small-50.png in Resources */,
 				3A6B07D32099BC3B0094FA3E /* colorPicker.fsh in Resources */,
 				3A6B07D72099BC3B0094FA3E /* blitWithEraseMask.fsh in Resources */,
+				3A504DB220A05F1700753B15 /* 21.png in Resources */,
 				3A6B07E22099BC3B0094FA3E /* colordodge.fsh in Resources */,
 				3A6B07CB2099BC3B0094FA3E /* merge.fsh in Resources */,
+				3A504DAE20A0521000753B15 /* hole.png in Resources */,
 				AFCEBA2311D96215001AA22A /* Icon-Small.png in Resources */,
 				3A6B07E72099BC3B0094FA3E /* toHueChromaLuma.fsh in Resources */,
 				3A6B07CC2099BC3B0094FA3E /* fill.fsh in Resources */,

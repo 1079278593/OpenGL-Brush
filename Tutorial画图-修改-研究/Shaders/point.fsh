@@ -3,5 +3,7 @@ varying lowp vec4 color;
 
 void main()
 {
-	gl_FragColor = color * texture2D(texture, gl_PointCoord);
+
+    gl_FragColor = 0.9 * color * texture2D(texture, gl_PointCoord);
+    
 }

@@ -126,15 +126,15 @@ static inline float WDIntDistance(int x1, int y1, int x2, int y2) {
 }
 
 static inline CGPoint WDAddPoints(CGPoint a, CGPoint b) {
-    return CGPointMake(a.x + b.x, a.y + b.y);
+    return CGPointMake(a.x + b.x, a.y + b.y);//向量a+b
 }
 
 static inline CGPoint WDSubtractPoints(CGPoint a, CGPoint b) {
-    return CGPointMake(a.x - b.x, a.y - b.y);
+    return CGPointMake(a.x - b.x, a.y - b.y);//向量a-b
 }
 
 static inline CGSize WDAddSizes(CGSize a, CGSize b) {
-    return CGSizeMake(a.width + b.width, a.height + b.height);
+    return CGSizeMake(a.width + b.width, a.height + b.height);//向量a+b
 }
 
 
@@ -142,11 +142,11 @@ static inline float WDDistance(CGPoint a, CGPoint b) {
     float xd = (a.x - b.x);
     float yd = (a.y - b.y);
     
-    return sqrt(xd * xd + yd * yd);
+    return sqrt(xd * xd + yd * yd);//两个点的距离
 }
 
 static inline float WDClamp(float min, float max, float value) {
-    return (value < min) ? min : (value > max) ? max : value;
+    return (value < min) ? min : (value > max) ? max : value;//返回一个介与min和max之间的值
 }
 
 static inline CGPoint WDCenterOfRect(CGRect rect) {
@@ -154,15 +154,15 @@ static inline CGPoint WDCenterOfRect(CGRect rect) {
 }
 
 static inline CGRect WDMultiplyRectScalar(CGRect r, float s) {
-    return CGRectMake(r.origin.x * s, r.origin.y * s, r.size.width * s, r.size.height * s);
+    return CGRectMake(r.origin.x * s, r.origin.y * s, r.size.width * s, r.size.height * s);//向量X , 变成 aX
 }
 
 static inline CGSize WDMultiplySizeScalar(CGSize size, float s) {
-    return CGSizeMake(size.width * s, size.height * s);
+    return CGSizeMake(size.width * s, size.height * s);//向量X , 变成 aX
 }
 
 static inline CGPoint WDMultiplyPointScalar(CGPoint p, float s) {
-    return CGPointMake(p.x * s, p.y * s);
+    return CGPointMake(p.x * s, p.y * s);//向量X , 变成 aX
 }
 
 static inline CGRect WDRectWithPoints(CGPoint a, CGPoint b) {

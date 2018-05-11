@@ -524,38 +524,36 @@ NSString *WDGestureEndedNotification = @"WDGestureEnded";
     return CGRectApplyAffineTransform(self.bounds, iTx);
 }
 
-- (void) renderPhoto:(GLfloat *)proj withTransform:(CGAffineTransform)transform
-{
-    WDShader *blitShader = [self.painting getShader:@"nonPremultipliedBlit"];
-    glUseProgram(blitShader.program);
-    
-    glUniformMatrix4fv([blitShader locationForUniform:@"modelViewProjectionMatrix"], 1, GL_FALSE, proj);
-    glUniform1i([blitShader locationForUniform:@"texture"], (GLuint) 0);
-    glUniform1f([blitShader locationForUniform:@"opacity"], 1.0f);
-    
-    glActiveTexture(GL_TEXTURE0);
-    // Bind the texture to be used
-    glBindTexture(GL_TEXTURE_2D, photoTexture_.textureName);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    
-    CGRect rect = CGRectMake(0, 0, photo_.size.width, photo_.size.height);
-    WDGLRenderInRect(rect, transform);
-    WDCheckGLError();
-}
-
 - (CGRect) convertRectFromDocument:(CGRect)rect
 {
     return CGRectApplyAffineTransform(rect, canvasTransform_);
 }
 
+#pragma mark - 更新layer，由通知：触发
 - (void) updateIfNeeded
 {
-    NSLog(@"canvas updateIfNeeded");
+    NSLog(@"Canvas: updateIfNeeded");
     if (CGRectEqualToRect(self.dirtyRect, CGRectZero)) {
         return;
     }
     
     [self drawViewInRect:self.dirtyRect];
+}
+
+#pragma mark 通知处理函数，调用updateIfNeeded
+- (void) invalidateFromNotification:(NSNotification *)aNotification
+{
+    NSLog(@"Canvas: 通知回调 执行：updateIfNeeded");
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(updateIfNeeded) object:nil];
+    [self performSelector:@selector(updateIfNeeded) withObject:nil afterDelay:0.0f];
+    
+    NSDictionary *userInfo = aNotification.userInfo;
+    if (userInfo && userInfo[@"rect"]) {
+        NSValue *rect = userInfo[@"rect"];
+        self.dirtyRect = WDUnionRect(self.dirtyRect, rect.CGRectValue);
+    } else {
+        self.dirtyRect = [self visibleRect];
+    }
 }
 
 #pragma mark - draw
@@ -570,8 +568,10 @@ NSString *WDGestureEndedNotification = @"WDGestureEnded";
     [self drawViewInRect:[self visibleRect]];
 }
 
+#pragma mark 在这里绘制
 - (void) drawViewInRect:(CGRect)rect
 {
+    NSLog(@"Canvas: drawViewInRect");
     float scale = [UIScreen mainScreen].scale;
     
     [EAGLContext setCurrentContext:self.context];
@@ -579,7 +579,7 @@ NSString *WDGestureEndedNotification = @"WDGestureEnded";
     glBindFramebuffer(GL_FRAMEBUFFER, mainRegion.framebuffer);
     glViewport(0, 0, mainRegion.width, mainRegion.height);
     
-    if (WDCanUseScissorTest()) {
+    if (WDCanUseScissorTest()) {//裁剪测试
         CGRect scissorRect = [self convertRectFromDocument:rect];
         scissorRect = WDMultiplyRectScalar(scissorRect, scale);
         scissorRect = CGRectIntegral(scissorRect);
@@ -643,6 +643,26 @@ NSString *WDGestureEndedNotification = @"WDGestureEnded";
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     // unbind VAO
     glBindVertexArrayOES(0);
+}
+
+#pragma mark render photo
+- (void) renderPhoto:(GLfloat *)proj withTransform:(CGAffineTransform)transform
+{
+    WDShader *blitShader = [self.painting getShader:@"nonPremultipliedBlit"];
+    glUseProgram(blitShader.program);
+    
+    glUniformMatrix4fv([blitShader locationForUniform:@"modelViewProjectionMatrix"], 1, GL_FALSE, proj);
+    glUniform1i([blitShader locationForUniform:@"texture"], (GLuint) 0);
+    glUniform1f([blitShader locationForUniform:@"opacity"], 1.0f);
+    
+    glActiveTexture(GL_TEXTURE0);
+    // Bind the texture to be used
+    glBindTexture(GL_TEXTURE_2D, photoTexture_.textureName);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    
+    CGRect rect = CGRectMake(0, 0, photo_.size.width, photo_.size.height);
+    WDGLRenderInRect(rect, transform);
+    WDCheckGLError();
 }
 
 #pragma mark -
@@ -1015,20 +1035,6 @@ NSString *WDGestureEndedNotification = @"WDGestureEnded";
 - (void) cancelUpdate
 {
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(updateIfNeeded) object:nil];
-}
-
-- (void) invalidateFromNotification:(NSNotification *)aNotification
-{    
-    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(updateIfNeeded) object:nil];
-    [self performSelector:@selector(updateIfNeeded) withObject:nil afterDelay:0.0f];
-
-    NSDictionary *userInfo = aNotification.userInfo;
-    if (userInfo && userInfo[@"rect"]) {
-        NSValue *rect = userInfo[@"rect"];
-        self.dirtyRect = WDUnionRect(self.dirtyRect, rect.CGRectValue);
-    } else {
-        self.dirtyRect = [self visibleRect];
-    }
 }
 
 - (void) startActivity

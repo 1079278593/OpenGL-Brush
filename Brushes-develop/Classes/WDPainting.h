@@ -32,7 +32,7 @@
     NSUndoManager           *undoManager_;
     NSInteger               suppressNotifications_;
     
-    GLfloat                 projection_[16];
+    GLfloat                 projection_[16];//投影
     NSInteger               undoNesting_;
 }
 
