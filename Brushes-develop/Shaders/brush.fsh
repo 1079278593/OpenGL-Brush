@@ -15,6 +15,7 @@ uniform sampler2D texture;
 
 void main (void)
 {
+    //texture2D()在OpenGL 3.3时被弃用。texture()
     float f = texture2D(texture, varTexcoord.st, 0.0).a;
     float v = varIntensity * f;
     

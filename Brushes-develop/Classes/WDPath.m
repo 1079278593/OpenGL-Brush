@@ -581,9 +581,6 @@ typedef struct {
     self.nodes = newNodes;
 }
 
-
-
-
 - (CGRect) drawData
 {
     vertexData *vertexD = calloc(sizeof(vertexData), points_.count * 4 + (points_.count - 1) * 2);
@@ -612,6 +609,12 @@ typedef struct {
         t = CGAffineTransformRotate(t, angle);
         t = CGAffineTransformTranslate(t, -WDCenterOfRect(rect).x, -WDCenterOfRect(rect).y);
         
+        /**
+         点[x,y,1]  矩阵[a,b,0]
+                       [c,d,0]
+                       [tx,ty,1]
+         二者相乘
+         */
         a = CGPointApplyAffineTransform(a, t);
         b = CGPointApplyAffineTransform(b, t);
         c = CGPointApplyAffineTransform(c, t);

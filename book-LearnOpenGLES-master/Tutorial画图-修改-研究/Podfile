@@ -1,0 +1,7 @@
+platform :ios, '8.0'
+#use_frameworks!个别需要用到它，比如reactiveCocoa
+
+
+target 'GLPaint' do
+  pod 'SVGKit', :git => 'https://github.com/SVGKit/SVGKit.git', :branch => '2.x'
+end

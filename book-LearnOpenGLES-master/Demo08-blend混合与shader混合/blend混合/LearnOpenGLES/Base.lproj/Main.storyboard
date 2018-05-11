@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16C68" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="Ncs-Xj-xVu">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="API-40-Yu2">
+            <objects>
+                <viewController id="Ncs-Xj-xVu" customClass="LYGLViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="7so-9W-PkE"/>
+                        <viewControllerLayoutGuide type="bottom" id="X0X-QU-Ebl"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="cDM-gx-J3Q" customClass="LearnView">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QzH-6a-86E">
+                                <rect key="frame" x="172" y="40" width="31" height="30"/>
+                                <state key="normal" title="旋转"/>
+                                <connections>
+                                    <action selector="onRotate:" destination="cDM-gx-J3Q" eventType="touchUpInside" id="CcX-7A-MGh"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="QzH-6a-86E" firstAttribute="top" secondItem="7so-9W-PkE" secondAttribute="bottom" constant="20" id="Xc3-cF-e2V"/>
+                            <constraint firstItem="QzH-6a-86E" firstAttribute="centerX" secondItem="cDM-gx-J3Q" secondAttribute="centerX" id="eTW-cq-tt5"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="bHb-eK-cpH" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1012" y="232.53373313343329"/>
+        </scene>
+    </scenes>
+</document>

@@ -201,6 +201,7 @@ NSString *WDActiveLayerChangedNotification = @"WDActiveLayerChangedNotification"
 
 - (WDShader *) getShader:(NSString *)shaderKey
 {
+    NSLog(@"Paint: 获取着色器：%@",shaderKey);
     [EAGLContext setCurrentContext:self.context];
     return shaders[shaderKey];
 }
@@ -424,7 +425,7 @@ NSString *WDActiveLayerChangedNotification = @"WDActiveLayerChangedNotification"
     }
 }
 
-#pragma mark blit:位块传输，平面化纹理
+#pragma mark - blit:位块传输，平面化纹理
 - (void) blitFlattenedTexture:(GLfloat *)projection
 {
     // use shader program
@@ -444,7 +445,11 @@ NSString *WDActiveLayerChangedNotification = @"WDActiveLayerChangedNotification"
     // unbind VAO
     glBindVertexArrayOES(0);
 }
-
+/**
+ 帧缓冲区位块传送(blit)可以高效的将一个矩形区域的像素值从一个帧缓冲区（读帧缓冲区）复制到另一个帧缓冲区（绘图缓冲区）。
+ 帧缓冲区位块传送的关键应用之一是将多重采样渲染缓冲区解析为一个纹理（用一个帧缓冲区对象，纹理绑定为它的颜色附着）.
+ 执行如下命令：glBlitFramebuffer()
+ */
 - (void) blit:(GLfloat *)projection
 {
     NSLog(@"Paint: blit");

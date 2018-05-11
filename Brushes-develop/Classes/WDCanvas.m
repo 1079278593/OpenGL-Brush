@@ -592,7 +592,7 @@ NSString *WDGestureEndedNotification = @"WDGestureEnded";
 
     // handle viewing matrices
     GLfloat proj[16], effectiveProj[16], final[16];
-    // setup projection matrix (orthographic)        
+    // setup projection matrix (orthographic) ：设置投影矩阵（正交）
     mat4f_LoadOrtho(0, mainRegion.width / scale, 0, mainRegion.height / scale, -1.0f, 1.0f, proj);
     
     mat4f_LoadCGAffineTransform(effectiveProj, canvasTransform_);
