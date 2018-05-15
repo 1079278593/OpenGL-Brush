@@ -2,6 +2,18 @@
 precision highp float;
 #endif
 
+/**
+ Color Dodge 颜色减淡
+ C=A+(A×B)/B反相
+ 
+ 该模式下，上层的亮度决定了下层的暴露程度。
+ 如果上层越亮，下层获取的光越多，也就是越亮。
+ 如果上层是纯黑色，也就是没有亮度，则根本不会影响下层。
+ 如果上层是纯白色，则下层除了像素为255的地方暴露外，
+ 其他地方全部为白色（也就是255，不暴露）。
+ 结果最黑的地方不会低于下层的像素值。
+ */
+
 // uniforms
 uniform sampler2D   baseImage;
 uniform sampler2D   blendImage;

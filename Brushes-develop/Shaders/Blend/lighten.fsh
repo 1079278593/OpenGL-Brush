@@ -2,6 +2,13 @@
 precision highp float;
 #endif
 
+/**Lighten 变亮
+ B<=A 则 C=A B>A 则 C=B
+ 
+ 与darken模式相同，不同的是：取色彩值较大的（也就是较亮的）作为输出结果。
+ 
+ */
+
 // uniforms
 uniform sampler2D   baseImage;
 uniform sampler2D   blendImage;

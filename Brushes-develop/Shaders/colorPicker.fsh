@@ -2,6 +2,7 @@
 precision highp float;
 #endif
 
+//color picker 颜色选择？
 #if __VERSION__ >= 140
 in vec2      varTexcoord;
 out vec4     fragColor;

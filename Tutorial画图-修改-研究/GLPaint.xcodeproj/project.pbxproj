@@ -88,6 +88,7 @@
 		3A6B07E72099BC3B0094FA3E /* toHueChromaLuma.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 3A6B07C72099BC3B0094FA3E /* toHueChromaLuma.fsh */; };
 		3A6B07E82099BC3B0094FA3E /* blit.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 3A6B07C82099BC3B0094FA3E /* blit.vsh */; };
 		3A6E2DF12093210900E01F11 /* eye.png in Resources */ = {isa = PBXBuildFile; fileRef = 3A6E2DF02093210900E01F11 /* eye.png */; };
+		3A8DE24D20A9695C001D353C /* snow.png in Resources */ = {isa = PBXBuildFile; fileRef = 3A8DE24C20A9695C001D353C /* snow.png */; };
 		3ADB96082024705000EBE78A /* QuadPathFunc.m in Sources */ = {isa = PBXBuildFile; fileRef = 3ADB96072024705000EBE78A /* QuadPathFunc.m */; };
 		3ADB960B2024706F00EBE78A /* CubicPathFunc.m in Sources */ = {isa = PBXBuildFile; fileRef = 3ADB960A2024706F00EBE78A /* CubicPathFunc.m */; };
 		3ADB960E2024726200EBE78A /* BezierPathFunc.m in Sources */ = {isa = PBXBuildFile; fileRef = 3ADB960D2024726200EBE78A /* BezierPathFunc.m */; };
@@ -218,6 +219,7 @@
 		3A6B07C72099BC3B0094FA3E /* toHueChromaLuma.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = toHueChromaLuma.fsh; sourceTree = "<group>"; };
 		3A6B07C82099BC3B0094FA3E /* blit.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = blit.vsh; sourceTree = "<group>"; };
 		3A6E2DF02093210900E01F11 /* eye.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = eye.png; sourceTree = "<group>"; };
+		3A8DE24C20A9695C001D353C /* snow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = snow.png; sourceTree = "<group>"; };
 		3ADB96062024705000EBE78A /* QuadPathFunc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QuadPathFunc.h; sourceTree = "<group>"; };
 		3ADB96072024705000EBE78A /* QuadPathFunc.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QuadPathFunc.m; sourceTree = "<group>"; };
 		3ADB96092024706F00EBE78A /* CubicPathFunc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CubicPathFunc.h; sourceTree = "<group>"; };
@@ -317,6 +319,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				3A8DE24C20A9695C001D353C /* snow.png */,
 				3A6E2DF02093210900E01F11 /* eye.png */,
 				3A504DAD20A0521000753B15 /* hole.png */,
 				3A504DB120A05F1700753B15 /* 21.png */,
@@ -652,6 +655,7 @@
 				AFCEBA2211D96215001AA22A /* Icon-Small-50.png in Resources */,
 				3A6B07D32099BC3B0094FA3E /* colorPicker.fsh in Resources */,
 				3A6B07D72099BC3B0094FA3E /* blitWithEraseMask.fsh in Resources */,
+				3A8DE24D20A9695C001D353C /* snow.png in Resources */,
 				3A504DB220A05F1700753B15 /* 21.png in Resources */,
 				3A6B07E22099BC3B0094FA3E /* colordodge.fsh in Resources */,
 				3A6B07CB2099BC3B0094FA3E /* merge.fsh in Resources */,

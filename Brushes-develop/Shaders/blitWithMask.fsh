@@ -2,6 +2,8 @@
 precision highp float;
 #endif
 
+//blit with mask
+
 #if __VERSION__ >= 140
 in vec2      varTexcoord;
 out vec4     fragColor;

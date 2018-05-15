@@ -2,6 +2,8 @@
 precision highp float;
 #endif
 
+//normal 正常，不混合
+
 // uniforms
 uniform sampler2D   baseImage;
 uniform sampler2D   blendImage;

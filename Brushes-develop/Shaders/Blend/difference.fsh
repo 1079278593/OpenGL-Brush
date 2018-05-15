@@ -2,6 +2,15 @@
 precision highp float;
 #endif
 
+/**
+ Difference 差值
+ C=|A-B|
+ 
+ 上下层色调的绝对值。
+ 该模式主要用于比较两个不同版本的图片。
+ 如果两者完全一样，则结果为全黑。
+ */
+
 // uniforms
 uniform sampler2D   baseImage;
 uniform sampler2D   blendImage;

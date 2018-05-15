@@ -2,6 +2,16 @@
 precision highp float;
 #endif
 
+/**
+ Darken 变暗
+ B<=A 则 C=B B>=A 则 C=A
+ 
+ 该模式通过比较上下层像素后取相对较暗的像素作为输出，
+ 注意，每个不同的颜色通道的像素都是独立的进行比较，色彩值相对较小的作为输出结果。
+ 下层表示叠放次序位于下面的那个图层，
+ 上层表示叠放次序位于上面的那个图层
+ */
+
 // uniforms
 uniform sampler2D   baseImage;
 uniform sampler2D   blendImage;

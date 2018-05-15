@@ -30,7 +30,7 @@
 //CONSTANTS:
 
 #define kBrushOpacity		(1.0 / 3.0)
-#define kBrushPixelStep		3
+#define kBrushPixelStep		30
 #define kBrushScale			2
 
 
@@ -178,102 +178,6 @@ typedef struct {
 }
 
 
-- (BOOL)initGL
-{
-    // Generate IDs for a framebuffer object and a color renderbuffer
-    glGenFramebuffers(1, &viewFramebuffer);
-    glGenRenderbuffers(1, &viewRenderbuffer);
-    
-    glBindFramebuffer(GL_FRAMEBUFFER, viewFramebuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, viewRenderbuffer);
-    // This call associates the storage for the current render buffer with the EAGLDrawable (our CAEAGLLayer)
-    // allowing us to draw into a buffer that will later be rendered to screen wherever the layer is (which corresponds with our view).
-    [context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(id<EAGLDrawable>)self.layer];
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, viewRenderbuffer);
-    
-    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &backingWidth);
-    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &backingHeight);
-    
-    // For this sample, we do not need a depth buffer. If you do, this is how you can create one and attach it to the framebuffer:
-    //    glGenRenderbuffers(1, &depthRenderbuffer);
-    //    glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
-    //    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, backingWidth, backingHeight);
-    //    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
-    
-    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-    {
-        NSLog(@"failed to make complete framebuffer object %x", glCheckFramebufferStatus(GL_FRAMEBUFFER));
-        return NO;
-    }
-    
-    // Setup the view port in Pixels
-    glViewport(0, 0, backingWidth, backingHeight);
-    
-    // Create a Vertex Buffer Object to hold our data
-    glGenBuffers(1, &vboId);
-    
-    // Load the brush texture:Particle.png、eye.png、hole.png
-//    brushTexture = [self textureFromName:@"Particle.png"];
-    brushTexture = [self textureFromName:@"eye.png"];
-    
-    // Load shaders
-    [self setupShaders];
-    
-    // Enable blending and set a blending function appropriate for premultiplied alpha pixel data
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-    
-    //1.读取路径绘制
-    NSString* path = [[NSBundle mainBundle] pathForResource:@"abc" ofType:@"string"];
-    NSString* str = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
-    lyArr = [NSMutableArray array];
-    NSArray* jsonArr = [NSJSONSerialization JSONObjectWithData:[str dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingAllowFragments error:nil];
-    for (NSDictionary* dict in jsonArr) {
-        LYPoint* point = [LYPoint new];
-        point.mX = [dict objectForKey:@"mX"];
-        point.mY = [dict objectForKey:@"mY"];
-        [lyArr addObject:point];
-    }
-
-    //2.线性插值绘制：P0={20, 120}, P1={120, 340}, P2={240, 340}, P3={320, 180};
-//    CubicPathFunc *pathCalculate = [[CubicPathFunc alloc]init];
-//    pathCalculate.pathPoints = [self getCubicPath];
-//    lyArr = [NSMutableArray array];
-//    for (NSValue *value in [pathCalculate linearInterpolation]) {
-//        LYPoint* point = [LYPoint new];
-//        point.mX = @(value.CGPointValue.x);
-//        point.mY = @(value.CGPointValue.y);
-//        [lyArr addObject:point];
-//    }
-    
-    //3.二分法曲线绘制
-//    UIBezierPath *path3 = [self bezierPath1];
-//    lyArr = [NSMutableArray array];
-//    for (int i = 0; i < 40; i++) {
-//        CGPoint percentPoint = [path3 pointAtPercentOfLength:(i/40.0)];
-//        LYPoint* point = [LYPoint new];
-//
-//        point.mX = @(percentPoint.x);
-//        point.mY = @(percentPoint.y);
-//        [lyArr addObject:point];
-//    }
-    
-    //4.任意阶贝塞尔绘制
-//    lyArr = [NSMutableArray array];
-//    for (NSArray *dims in [BezierPathFunc pointsFromControlPoints:[self anyBezierPaths] precision:1200]) {
-//        LYPoint* point = [LYPoint new];
-//        point.mX = dims[0];//@([ floatValue]);
-//        point.mY = dims[1];//@([dims[0] floatValue]);
-//        [lyArr addObject:point];
-//    }
-    
-    //5.贝塞尔曲线：长度计算比较
-//    [self compareEqual];
-
-    [self performSelector:@selector(paint) withObject:nil afterDelay:0.5];
-    
-    return YES;
-}
 
 // Releases resources when they are not longer needed.
 - (void)dealloc
@@ -309,6 +213,103 @@ typedef struct {
 }
 
 #pragma mark - OpenGL Set
+- (BOOL)initGL
+{
+    // Generate IDs for a framebuffer object and a color renderbuffer
+    glGenFramebuffers(1, &viewFramebuffer);
+    glGenRenderbuffers(1, &viewRenderbuffer);
+    
+    glBindFramebuffer(GL_FRAMEBUFFER, viewFramebuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, viewRenderbuffer);
+    // This call associates the storage for the current render buffer with the EAGLDrawable (our CAEAGLLayer)
+    // allowing us to draw into a buffer that will later be rendered to screen wherever the layer is (which corresponds with our view).
+    [context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(id<EAGLDrawable>)self.layer];
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, viewRenderbuffer);
+    
+    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &backingWidth);
+    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &backingHeight);
+    
+    // For this sample, we do not need a depth buffer. If you do, this is how you can create one and attach it to the framebuffer:
+    //    glGenRenderbuffers(1, &depthRenderbuffer);
+    //    glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
+    //    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, backingWidth, backingHeight);
+    //    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
+    
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        NSLog(@"failed to make complete framebuffer object %x", glCheckFramebufferStatus(GL_FRAMEBUFFER));
+        return NO;
+    }
+    
+    // Setup the view port in Pixels
+    glViewport(0, 0, backingWidth, backingHeight);
+    
+    // Create a Vertex Buffer Object to hold our data
+    glGenBuffers(1, &vboId);
+    
+    // Load the brush texture:Particle.png、eye.png、hole.png
+    //    brushTexture = [self textureFromName:@"Particle.png"];
+    brushTexture = [self textureFromName:@"snow.png"];
+    
+    // Load shaders
+    [self setupShaders];
+    
+    // Enable blending and set a blending function appropriate for premultiplied alpha pixel data
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    
+    //1.读取路径绘制
+    NSString* path = [[NSBundle mainBundle] pathForResource:@"abc" ofType:@"string"];
+    NSString* str = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
+    lyArr = [NSMutableArray array];
+    NSArray* jsonArr = [NSJSONSerialization JSONObjectWithData:[str dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingAllowFragments error:nil];
+    for (NSDictionary* dict in jsonArr) {
+        LYPoint* point = [LYPoint new];
+        point.mX = [dict objectForKey:@"mX"];
+        point.mY = [dict objectForKey:@"mY"];
+        [lyArr addObject:point];
+    }
+    
+    //2.线性插值绘制：P0={20, 120}, P1={120, 340}, P2={240, 340}, P3={320, 180};
+    //    CubicPathFunc *pathCalculate = [[CubicPathFunc alloc]init];
+    //    pathCalculate.pathPoints = [self getCubicPath];
+    //    lyArr = [NSMutableArray array];
+    //    for (NSValue *value in [pathCalculate linearInterpolation]) {
+    //        LYPoint* point = [LYPoint new];
+    //        point.mX = @(value.CGPointValue.x);
+    //        point.mY = @(value.CGPointValue.y);
+    //        [lyArr addObject:point];
+    //    }
+    
+    //3.二分法曲线绘制
+    //    UIBezierPath *path3 = [self bezierPath1];
+    //    lyArr = [NSMutableArray array];
+    //    for (int i = 0; i < 40; i++) {
+    //        CGPoint percentPoint = [path3 pointAtPercentOfLength:(i/40.0)];
+    //        LYPoint* point = [LYPoint new];
+    //
+    //        point.mX = @(percentPoint.x);
+    //        point.mY = @(percentPoint.y);
+    //        [lyArr addObject:point];
+    //    }
+    
+    //4.任意阶贝塞尔绘制
+    //    lyArr = [NSMutableArray array];
+    //    for (NSArray *dims in [BezierPathFunc pointsFromControlPoints:[self anyBezierPaths] precision:1200]) {
+    //        LYPoint* point = [LYPoint new];
+    //        point.mX = dims[0];//@([ floatValue]);
+    //        point.mY = dims[1];//@([dims[0] floatValue]);
+    //        [lyArr addObject:point];
+    //    }
+    
+    //5.贝塞尔曲线：长度计算比较
+    //    [self compareEqual];
+    
+    [self performSelector:@selector(paint) withObject:nil afterDelay:0.5];
+    
+    return YES;
+}
+
 - (void)setupShaders
 {
 	for (int i = 0; i < NUM_PROGRAMS; i++)
@@ -343,7 +344,7 @@ typedef struct {
 		free(vsrc);
 		free(fsrc);
         
-        // Set constant/initalize uniforms
+        // Set constant/initalize uniforms :设置‘统一变量’
         if (i == PROGRAM_POINT)
         {
             glUseProgram(program[PROGRAM_POINT].id);
@@ -353,9 +354,10 @@ typedef struct {
             
             // viewing matrices
             GLKMatrix4 projectionMatrix = GLKMatrix4MakeOrtho(0, backingWidth, 0, backingHeight, -1, 1);
+            float random = 1.0/(arc4random()%10+1);//增加一个旋转
+            GLKMatrix4 rotationMatrix = GLKMatrix4RotateX(projectionMatrix, random*M_PI);
             GLKMatrix4 modelViewMatrix = GLKMatrix4Identity; // this sample uses a constant identity modelView matrix
-            GLKMatrix4 MVPMatrix = GLKMatrix4Multiply(projectionMatrix, modelViewMatrix);
-            
+            GLKMatrix4 MVPMatrix = GLKMatrix4Multiply(rotationMatrix, modelViewMatrix);
             glUniformMatrix4fv(program[PROGRAM_POINT].uniform[UNIFORM_MVP], 1, GL_FALSE, MVPMatrix.m);
         
             // point size
@@ -383,8 +385,8 @@ typedef struct {
     brushImage = [UIImage imageNamed:name].CGImage;
     
     // Get the width and height of the image
-    width = CGImageGetWidth(brushImage);
-    height = CGImageGetHeight(brushImage);
+    width = CGImageGetWidth(brushImage)*2;
+    height = CGImageGetHeight(brushImage)*2;
     
     // Make sure the image exists
     if(brushImage) {
@@ -414,7 +416,6 @@ typedef struct {
     
     return texture;
 }
-
 
 - (BOOL)resizeFromLayer:(CAEAGLLayer *)layer
 {
@@ -457,7 +458,7 @@ typedef struct {
 	
 	// Clear the buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, viewFramebuffer);
-	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	
 	// Display the buffer
@@ -559,58 +560,6 @@ typedef struct {
 #pragma mark - Private Method
 #pragma mark 根据点来画线条
 // Drawings a line onscreen based on where the user touches
-- (void)renderLineFromPoint_0:(CGPoint)start toPoint:(CGPoint)end
-{
-    static GLfloat*        vertexBuffer = NULL;
-    static NSUInteger    vertexMax = 64;
-    NSUInteger            vertexCount = 0,
-    count,
-    i;
-    
-    [EAGLContext setCurrentContext:context];
-    glBindFramebuffer(GL_FRAMEBUFFER, viewFramebuffer);
-    
-    // Convert locations from Points to Pixels
-    CGFloat scale = self.contentScaleFactor;
-    start.x *= scale;
-    start.y *= scale;
-    end.x *= scale;
-    end.y *= scale;
-    
-    // Allocate vertex array buffer
-    if(vertexBuffer == NULL)
-        vertexBuffer = malloc(vertexMax * 2 * sizeof(GLfloat));
-    
-    // Add points to the buffer so there are drawing points every X pixels
-    count = MAX(ceilf(sqrtf((end.x - start.x) * (end.x - start.x) + (end.y - start.y) * (end.y - start.y)) / kBrushPixelStep), 1);
-    for(i = 0; i < count; ++i) {
-        if(vertexCount == vertexMax) {
-            vertexMax = 2 * vertexMax;
-            vertexBuffer = realloc(vertexBuffer, vertexMax * 2 * sizeof(GLfloat));
-        }
-        
-        //将点放入vertexBuffer
-        vertexBuffer[2 * vertexCount + 0] = start.x + (end.x - start.x) * ((GLfloat)i / (GLfloat)count);
-        vertexBuffer[2 * vertexCount + 1] = start.y + (end.y - start.y) * ((GLfloat)i / (GLfloat)count);
-        vertexCount += 1;
-    }
-    
-    // Load data to the Vertex Buffer Object
-    glBindBuffer(GL_ARRAY_BUFFER, vboId);
-    glBufferData(GL_ARRAY_BUFFER, vertexCount*2*sizeof(GLfloat), vertexBuffer, GL_DYNAMIC_DRAW);
-    
-    glEnableVertexAttribArray(ATTRIB_VERTEX);
-    glVertexAttribPointer(ATTRIB_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, 0);
-    
-    // Draw
-    glUseProgram(program[PROGRAM_POINT].id);
-    glDrawArrays(GL_POINTS, 0, (int)vertexCount);
-    
-    // Display the buffer
-    glBindRenderbuffer(GL_RENDERBUFFER, viewRenderbuffer);
-    [context presentRenderbuffer:GL_RENDERBUFFER];
-}
-
 - (void)renderLineFromPoint:(CGPoint)start toPoint:(CGPoint)end
 {
     static GLfloat*        vertexBuffer = NULL;
@@ -647,6 +596,8 @@ typedef struct {
         vertexCount += 1;
     }
     
+    
+    
     // Load data to the Vertex Buffer Object
     glBindBuffer(GL_ARRAY_BUFFER, vboId);
     glBufferData(GL_ARRAY_BUFFER, vertexCount*2*sizeof(GLfloat), vertexBuffer, GL_DYNAMIC_DRAW);
@@ -656,6 +607,15 @@ typedef struct {
     
     // Draw
     glUseProgram(program[PROGRAM_POINT].id);
+    
+    // viewing matrices
+//    GLKMatrix4 projectionMatrix = GLKMatrix4MakeOrtho(0, backingWidth, 0, backingHeight, -1, 1);
+//    float random = 1.0/(arc4random()%10+1);//增加一个旋转
+//    GLKMatrix4 rotationMatrix = GLKMatrix4RotateX(projectionMatrix, random*M_PI);
+//    GLKMatrix4 modelViewMatrix = GLKMatrix4Identity; // this sample uses a constant identity modelView matrix
+//    GLKMatrix4 MVPMatrix = GLKMatrix4Multiply(rotationMatrix, modelViewMatrix);
+//    glUniformMatrix4fv(program[PROGRAM_POINT].uniform[UNIFORM_MVP], 1, GL_FALSE, MVPMatrix.m);
+    
     glDrawArrays(GL_POINTS, 0, (int)vertexCount);
     
     // Display the buffer

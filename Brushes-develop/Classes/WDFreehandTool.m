@@ -213,6 +213,7 @@
 
 - (void) gestureEnded:(WDPanGestureRecognizer *)recognizer
 {
+    NSLog(@"FreehandTool: gesture end");
     WDColor     *color = [WDActiveState sharedInstance].paintColor;
     WDBrush     *brush = [WDActiveState sharedInstance].brush;
     WDCanvas    *canvas = (WDCanvas *) recognizer.view;

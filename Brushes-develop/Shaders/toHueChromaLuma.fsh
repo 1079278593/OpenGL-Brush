@@ -2,6 +2,7 @@
 precision highp float;
 #endif
 
+// hue(色调)   chroma(浓度)  luma(亮度)   功能：RGBtoHCY
 #if __VERSION__ >= 140
 in vec2      varTexcoord;
 out vec4     fragColor;

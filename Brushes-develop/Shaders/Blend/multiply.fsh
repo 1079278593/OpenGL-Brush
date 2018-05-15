@@ -2,6 +2,15 @@
 precision highp float;
 #endif
 
+/**
+ Multiply 正片叠底
+ C=(A×B)/255
+ 
+ 该效果将两层像素的标准色彩值（基于0..1之间）相乘后输出
+ 其效果可以形容成：两个幻灯片叠加在一起然后放映，
+ 透射光需要分别通过这两个幻灯片，从而被削弱了两次。
+ */
+
 // uniforms
 uniform sampler2D   baseImage;
 uniform sampler2D   blendImage;

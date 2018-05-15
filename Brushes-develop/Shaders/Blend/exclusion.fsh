@@ -2,6 +2,12 @@
 precision highp float;
 #endif
 
+/**Exclusion 排除
+ C=A+B-(A×B)/128
+ 
+ 亮的图片区域将导致另一层的反相，很暗的区域则将导致另一层完全没有改变。
+ */
+
 // uniforms
 uniform sampler2D   baseImage;
 uniform sampler2D   blendImage;

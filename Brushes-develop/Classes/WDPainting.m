@@ -212,7 +212,7 @@ NSString *WDActiveLayerChangedNotification = @"WDActiveLayerChangedNotification"
     return [self generateTexture:pixels deepColor:NO];
 }
 
-#pragma mark 生成画布纹理
+#pragma mark 生成纹理
 - (GLuint) generateTexture:(GLubyte *)pixels deepColor:(BOOL)deepColor
 {
     [EAGLContext setCurrentContext:self.context];
@@ -299,6 +299,7 @@ NSString *WDActiveLayerChangedNotification = @"WDActiveLayerChangedNotification"
     
     //modelViewProjectionMatrix：模型视图投影矩阵，MVP；作用变换位置
     glUniform1i([brushShader locationForUniform:@"texture"], 0);//采样器：GL_TEXTURE0 -> 0
+
     glUniformMatrix4fv([brushShader locationForUniform:@"modelViewProjectionMatrix"], 1, GL_FALSE, projection_);
     WDCheckGLError();
 }
@@ -453,7 +454,7 @@ NSString *WDActiveLayerChangedNotification = @"WDActiveLayerChangedNotification"
 - (void) blit:(GLfloat *)projection
 {
     NSLog(@"Paint: blit");
-    if (self.flattenMode) {
+    if (self.flattenMode) {//目前这里似乎都是No，所以不进入
         [self blitFlattenedTexture:projection];
         return;
     }
@@ -772,8 +773,10 @@ NSString *WDActiveLayerChangedNotification = @"WDActiveLayerChangedNotification"
     return [self imageForData:data size:self.dimensions];
 }
 
+#pragma mark
 - (NSData *) imageDataForCurrentStateWithBackgroundColor:(UIColor *)color
 {
+    NSLog(@"Paint: 3");
     NSData *result = nil;
     
     // make sure the painting's context is current
@@ -803,6 +806,7 @@ NSString *WDActiveLayerChangedNotification = @"WDActiveLayerChangedNotification"
                                                               (float) height / viewportHeight);
         mat4f_LoadCGAffineTransform(effectiveProj, scale);
         mat4f_MultiplyMat4f(projection_, effectiveProj, final);
+        
         
         CGFloat r, g, b, w, a;
         if ([color getRed:&r green:&g blue:&b alpha:&a]) {

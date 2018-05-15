@@ -1,0 +1,636 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		3A8DE25C20AA74C4001D353C /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A8DE25B20AA74C4001D353C /* AppDelegate.m */; };
+		3A8DE25F20AA74C4001D353C /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A8DE25E20AA74C4001D353C /* ViewController.m */; };
+		3A8DE26220AA74C4001D353C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3A8DE26020AA74C4001D353C /* Main.storyboard */; };
+		3A8DE26420AA74C5001D353C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3A8DE26320AA74C5001D353C /* Assets.xcassets */; };
+		3A8DE26720AA74C5001D353C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3A8DE26520AA74C5001D353C /* LaunchScreen.storyboard */; };
+		3A8DE26A20AA74C5001D353C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A8DE26920AA74C5001D353C /* main.m */; };
+		3A8DE27420AA74C5001D353C /* MyBrushTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A8DE27320AA74C5001D353C /* MyBrushTests.m */; };
+		3A8DE27F20AA74C6001D353C /* MyBrushUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A8DE27E20AA74C6001D353C /* MyBrushUITests.m */; };
+		3A8DE28E20AA7510001D353C /* PaintingView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A8DE28D20AA7510001D353C /* PaintingView.m */; };
+		3A8DE29220AA7618001D353C /* brush.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 3A8DE29020AA7618001D353C /* brush.vsh */; };
+		3A8DE29320AA7618001D353C /* brush.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 3A8DE29120AA7618001D353C /* brush.fsh */; };
+		3A8DE29B20AAAFA9001D353C /* gl_matrix.c in Sources */ = {isa = PBXBuildFile; fileRef = 3A8DE29820AAAFA9001D353C /* gl_matrix.c */; };
+		3A8DE29C20AAAFA9001D353C /* fileUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A8DE29920AAAFA9001D353C /* fileUtil.m */; };
+		3A8DE2A020AABA53001D353C /* ShaderUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A8DE29F20AABA53001D353C /* ShaderUtil.m */; };
+		3A8DE2A320AABAFA001D353C /* ShaderModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A8DE2A220AABAFA001D353C /* ShaderModel.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		3A8DE27020AA74C5001D353C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3A8DE24F20AA74C4001D353C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3A8DE25620AA74C4001D353C;
+			remoteInfo = MyBrush;
+		};
+		3A8DE27B20AA74C6001D353C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3A8DE24F20AA74C4001D353C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3A8DE25620AA74C4001D353C;
+			remoteInfo = MyBrush;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		3A8DE25720AA74C4001D353C /* MyBrush.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MyBrush.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3A8DE25A20AA74C4001D353C /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		3A8DE25B20AA74C4001D353C /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		3A8DE25D20AA74C4001D353C /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		3A8DE25E20AA74C4001D353C /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		3A8DE26120AA74C4001D353C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		3A8DE26320AA74C5001D353C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		3A8DE26620AA74C5001D353C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		3A8DE26820AA74C5001D353C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3A8DE26920AA74C5001D353C /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		3A8DE26F20AA74C5001D353C /* MyBrushTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MyBrushTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3A8DE27320AA74C5001D353C /* MyBrushTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MyBrushTests.m; sourceTree = "<group>"; };
+		3A8DE27520AA74C5001D353C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3A8DE27A20AA74C6001D353C /* MyBrushUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MyBrushUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3A8DE27E20AA74C6001D353C /* MyBrushUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MyBrushUITests.m; sourceTree = "<group>"; };
+		3A8DE28020AA74C6001D353C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3A8DE28C20AA7510001D353C /* PaintingView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PaintingView.h; sourceTree = "<group>"; };
+		3A8DE28D20AA7510001D353C /* PaintingView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PaintingView.m; sourceTree = "<group>"; };
+		3A8DE29020AA7618001D353C /* brush.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = brush.vsh; sourceTree = "<group>"; };
+		3A8DE29120AA7618001D353C /* brush.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = brush.fsh; sourceTree = "<group>"; };
+		3A8DE29520AAAFA9001D353C /* gl_matrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gl_matrix.h; sourceTree = "<group>"; };
+		3A8DE29620AAAFA9001D353C /* fileUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fileUtil.h; sourceTree = "<group>"; };
+		3A8DE29820AAAFA9001D353C /* gl_matrix.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gl_matrix.c; sourceTree = "<group>"; };
+		3A8DE29920AAAFA9001D353C /* fileUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = fileUtil.m; sourceTree = "<group>"; };
+		3A8DE29E20AABA53001D353C /* ShaderUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderUtil.h; sourceTree = "<group>"; };
+		3A8DE29F20AABA53001D353C /* ShaderUtil.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ShaderUtil.m; sourceTree = "<group>"; };
+		3A8DE2A120AABAFA001D353C /* ShaderModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderModel.h; sourceTree = "<group>"; };
+		3A8DE2A220AABAFA001D353C /* ShaderModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ShaderModel.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3A8DE25420AA74C4001D353C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3A8DE26C20AA74C5001D353C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3A8DE27720AA74C6001D353C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		3A8DE24E20AA74C4001D353C = {
+			isa = PBXGroup;
+			children = (
+				3A8DE29420AAAFA9001D353C /* Shader Utils */,
+				3A8DE28F20AA7618001D353C /* Shaders */,
+				3A8DE25920AA74C4001D353C /* MyBrush */,
+				3A8DE27220AA74C5001D353C /* MyBrushTests */,
+				3A8DE27D20AA74C6001D353C /* MyBrushUITests */,
+				3A8DE25820AA74C4001D353C /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		3A8DE25820AA74C4001D353C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3A8DE25720AA74C4001D353C /* MyBrush.app */,
+				3A8DE26F20AA74C5001D353C /* MyBrushTests.xctest */,
+				3A8DE27A20AA74C6001D353C /* MyBrushUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		3A8DE25920AA74C4001D353C /* MyBrush */ = {
+			isa = PBXGroup;
+			children = (
+				3A8DE25A20AA74C4001D353C /* AppDelegate.h */,
+				3A8DE25B20AA74C4001D353C /* AppDelegate.m */,
+				3A8DE25D20AA74C4001D353C /* ViewController.h */,
+				3A8DE25E20AA74C4001D353C /* ViewController.m */,
+				3A8DE28C20AA7510001D353C /* PaintingView.h */,
+				3A8DE28D20AA7510001D353C /* PaintingView.m */,
+				3A8DE26020AA74C4001D353C /* Main.storyboard */,
+				3A8DE26320AA74C5001D353C /* Assets.xcassets */,
+				3A8DE26520AA74C5001D353C /* LaunchScreen.storyboard */,
+				3A8DE26820AA74C5001D353C /* Info.plist */,
+				3A8DE26920AA74C5001D353C /* main.m */,
+			);
+			path = MyBrush;
+			sourceTree = "<group>";
+		};
+		3A8DE27220AA74C5001D353C /* MyBrushTests */ = {
+			isa = PBXGroup;
+			children = (
+				3A8DE27320AA74C5001D353C /* MyBrushTests.m */,
+				3A8DE27520AA74C5001D353C /* Info.plist */,
+			);
+			path = MyBrushTests;
+			sourceTree = "<group>";
+		};
+		3A8DE27D20AA74C6001D353C /* MyBrushUITests */ = {
+			isa = PBXGroup;
+			children = (
+				3A8DE27E20AA74C6001D353C /* MyBrushUITests.m */,
+				3A8DE28020AA74C6001D353C /* Info.plist */,
+			);
+			path = MyBrushUITests;
+			sourceTree = "<group>";
+		};
+		3A8DE28F20AA7618001D353C /* Shaders */ = {
+			isa = PBXGroup;
+			children = (
+				3A8DE29020AA7618001D353C /* brush.vsh */,
+				3A8DE29120AA7618001D353C /* brush.fsh */,
+			);
+			path = Shaders;
+			sourceTree = "<group>";
+		};
+		3A8DE29420AAAFA9001D353C /* Shader Utils */ = {
+			isa = PBXGroup;
+			children = (
+				3A8DE29620AAAFA9001D353C /* fileUtil.h */,
+				3A8DE29920AAAFA9001D353C /* fileUtil.m */,
+				3A8DE2A120AABAFA001D353C /* ShaderModel.h */,
+				3A8DE2A220AABAFA001D353C /* ShaderModel.m */,
+				3A8DE29E20AABA53001D353C /* ShaderUtil.h */,
+				3A8DE29F20AABA53001D353C /* ShaderUtil.m */,
+				3A8DE29520AAAFA9001D353C /* gl_matrix.h */,
+				3A8DE29820AAAFA9001D353C /* gl_matrix.c */,
+			);
+			path = "Shader Utils";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3A8DE25620AA74C4001D353C /* MyBrush */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3A8DE28320AA74C6001D353C /* Build configuration list for PBXNativeTarget "MyBrush" */;
+			buildPhases = (
+				3A8DE25320AA74C4001D353C /* Sources */,
+				3A8DE25420AA74C4001D353C /* Frameworks */,
+				3A8DE25520AA74C4001D353C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MyBrush;
+			productName = MyBrush;
+			productReference = 3A8DE25720AA74C4001D353C /* MyBrush.app */;
+			productType = "com.apple.product-type.application";
+		};
+		3A8DE26E20AA74C5001D353C /* MyBrushTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3A8DE28620AA74C6001D353C /* Build configuration list for PBXNativeTarget "MyBrushTests" */;
+			buildPhases = (
+				3A8DE26B20AA74C5001D353C /* Sources */,
+				3A8DE26C20AA74C5001D353C /* Frameworks */,
+				3A8DE26D20AA74C5001D353C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3A8DE27120AA74C5001D353C /* PBXTargetDependency */,
+			);
+			name = MyBrushTests;
+			productName = MyBrushTests;
+			productReference = 3A8DE26F20AA74C5001D353C /* MyBrushTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		3A8DE27920AA74C6001D353C /* MyBrushUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3A8DE28920AA74C6001D353C /* Build configuration list for PBXNativeTarget "MyBrushUITests" */;
+			buildPhases = (
+				3A8DE27620AA74C6001D353C /* Sources */,
+				3A8DE27720AA74C6001D353C /* Frameworks */,
+				3A8DE27820AA74C6001D353C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3A8DE27C20AA74C6001D353C /* PBXTargetDependency */,
+			);
+			name = MyBrushUITests;
+			productName = MyBrushUITests;
+			productReference = 3A8DE27A20AA74C6001D353C /* MyBrushUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3A8DE24F20AA74C4001D353C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0930;
+				ORGANIZATIONNAME = laihua;
+				TargetAttributes = {
+					3A8DE25620AA74C4001D353C = {
+						CreatedOnToolsVersion = 9.3;
+					};
+					3A8DE26E20AA74C5001D353C = {
+						CreatedOnToolsVersion = 9.3;
+						TestTargetID = 3A8DE25620AA74C4001D353C;
+					};
+					3A8DE27920AA74C6001D353C = {
+						CreatedOnToolsVersion = 9.3;
+						TestTargetID = 3A8DE25620AA74C4001D353C;
+					};
+				};
+			};
+			buildConfigurationList = 3A8DE25220AA74C4001D353C /* Build configuration list for PBXProject "MyBrush" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 3A8DE24E20AA74C4001D353C;
+			productRefGroup = 3A8DE25820AA74C4001D353C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				3A8DE25620AA74C4001D353C /* MyBrush */,
+				3A8DE26E20AA74C5001D353C /* MyBrushTests */,
+				3A8DE27920AA74C6001D353C /* MyBrushUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3A8DE25520AA74C4001D353C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3A8DE29220AA7618001D353C /* brush.vsh in Resources */,
+				3A8DE26720AA74C5001D353C /* LaunchScreen.storyboard in Resources */,
+				3A8DE26420AA74C5001D353C /* Assets.xcassets in Resources */,
+				3A8DE29320AA7618001D353C /* brush.fsh in Resources */,
+				3A8DE26220AA74C4001D353C /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3A8DE26D20AA74C5001D353C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3A8DE27820AA74C6001D353C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3A8DE25320AA74C4001D353C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3A8DE2A320AABAFA001D353C /* ShaderModel.m in Sources */,
+				3A8DE25F20AA74C4001D353C /* ViewController.m in Sources */,
+				3A8DE26A20AA74C5001D353C /* main.m in Sources */,
+				3A8DE28E20AA7510001D353C /* PaintingView.m in Sources */,
+				3A8DE2A020AABA53001D353C /* ShaderUtil.m in Sources */,
+				3A8DE29C20AAAFA9001D353C /* fileUtil.m in Sources */,
+				3A8DE29B20AAAFA9001D353C /* gl_matrix.c in Sources */,
+				3A8DE25C20AA74C4001D353C /* AppDelegate.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3A8DE26B20AA74C5001D353C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3A8DE27420AA74C5001D353C /* MyBrushTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3A8DE27620AA74C6001D353C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3A8DE27F20AA74C6001D353C /* MyBrushUITests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		3A8DE27120AA74C5001D353C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3A8DE25620AA74C4001D353C /* MyBrush */;
+			targetProxy = 3A8DE27020AA74C5001D353C /* PBXContainerItemProxy */;
+		};
+		3A8DE27C20AA74C6001D353C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3A8DE25620AA74C4001D353C /* MyBrush */;
+			targetProxy = 3A8DE27B20AA74C6001D353C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		3A8DE26020AA74C4001D353C /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				3A8DE26120AA74C4001D353C /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		3A8DE26520AA74C5001D353C /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				3A8DE26620AA74C5001D353C /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		3A8DE28120AA74C6001D353C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.3;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		3A8DE28220AA74C6001D353C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		3A8DE28420AA74C6001D353C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = AT942ZRU45;
+				INFOPLIST_FILE = MyBrush/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.laihua.MyBrush;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		3A8DE28520AA74C6001D353C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = AT942ZRU45;
+				INFOPLIST_FILE = MyBrush/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.laihua.MyBrush;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		3A8DE28720AA74C6001D353C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = AT942ZRU45;
+				INFOPLIST_FILE = MyBrushTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.laihua.MyBrushTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MyBrush.app/MyBrush";
+			};
+			name = Debug;
+		};
+		3A8DE28820AA74C6001D353C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = AT942ZRU45;
+				INFOPLIST_FILE = MyBrushTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.laihua.MyBrushTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MyBrush.app/MyBrush";
+			};
+			name = Release;
+		};
+		3A8DE28A20AA74C6001D353C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = AT942ZRU45;
+				INFOPLIST_FILE = MyBrushUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.laihua.MyBrushUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = MyBrush;
+			};
+			name = Debug;
+		};
+		3A8DE28B20AA74C6001D353C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = AT942ZRU45;
+				INFOPLIST_FILE = MyBrushUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.laihua.MyBrushUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = MyBrush;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3A8DE25220AA74C4001D353C /* Build configuration list for PBXProject "MyBrush" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3A8DE28120AA74C6001D353C /* Debug */,
+				3A8DE28220AA74C6001D353C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3A8DE28320AA74C6001D353C /* Build configuration list for PBXNativeTarget "MyBrush" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3A8DE28420AA74C6001D353C /* Debug */,
+				3A8DE28520AA74C6001D353C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3A8DE28620AA74C6001D353C /* Build configuration list for PBXNativeTarget "MyBrushTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3A8DE28720AA74C6001D353C /* Debug */,
+				3A8DE28820AA74C6001D353C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3A8DE28920AA74C6001D353C /* Build configuration list for PBXNativeTarget "MyBrushUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3A8DE28A20AA74C6001D353C /* Debug */,
+				3A8DE28B20AA74C6001D353C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 3A8DE24F20AA74C4001D353C /* Project object */;
+}

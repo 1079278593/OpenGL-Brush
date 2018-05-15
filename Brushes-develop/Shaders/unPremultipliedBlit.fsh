@@ -2,6 +2,7 @@
 precision highp float;
 #endif
 
+//unPremultiplied blit .premultiplied：预乘
 #if __VERSION__ >= 140
 in vec2      varTexcoord;
 out vec4     fragColor;
