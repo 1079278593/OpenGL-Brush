@@ -248,7 +248,6 @@ typedef struct {
     glGenBuffers(1, &vboId);
     
     // Load the brush texture:Particle.png、eye.png、hole.png
-    //    brushTexture = [self textureFromName:@"Particle.png"];
     brushTexture = [self textureFromName:@"snow.png"];
     
     // Load shaders
@@ -352,13 +351,13 @@ typedef struct {
             // the brush texture will be bound to texture unit 0
             glUniform1i(program[PROGRAM_POINT].uniform[UNIFORM_TEXTURE], 0);
             
-            // viewing matrices
+            // viewing matrices：这里的设置会被：layoutsubview覆盖
             GLKMatrix4 projectionMatrix = GLKMatrix4MakeOrtho(0, backingWidth, 0, backingHeight, -1, 1);
             float random = 1.0/(arc4random()%10+1);//增加一个旋转
             GLKMatrix4 rotationMatrix = GLKMatrix4RotateX(projectionMatrix, random*M_PI);
             GLKMatrix4 modelViewMatrix = GLKMatrix4Identity; // this sample uses a constant identity modelView matrix
             GLKMatrix4 MVPMatrix = GLKMatrix4Multiply(rotationMatrix, modelViewMatrix);
-            glUniformMatrix4fv(program[PROGRAM_POINT].uniform[UNIFORM_MVP], 1, GL_FALSE, MVPMatrix.m);
+//            glUniformMatrix4fv(program[PROGRAM_POINT].uniform[UNIFORM_MVP], 1, GL_FALSE, MVPMatrix.m);
         
             // point size
             glUniform1f(program[PROGRAM_POINT].uniform[UNIFORM_POINT_SIZE], brushTexture.width / kBrushScale);
@@ -594,6 +593,7 @@ typedef struct {
         vertexBuffer[2 * vertexCount + 0] = start.x + (end.x - start.x) * ((GLfloat)i / (GLfloat)count);
         vertexBuffer[2 * vertexCount + 1] = start.y + (end.y - start.y) * ((GLfloat)i / (GLfloat)count);
         vertexCount += 1;
+        NSLog(@"%f",vertexBuffer[2 * vertexCount + 0]);
     }
     
     

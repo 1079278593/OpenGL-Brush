@@ -61,8 +61,10 @@
     // attach fragment shader to program
     glAttachShader(_program, fragShader);
     
+    //参考《OpenGL es 3.0编程指南》 98页。这里是第2种方式
     // bind attribute locations; this needs to be done prior to linking
     [attributeNames enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        //根据idx，对输入变量生成一个‘location id’,与变量绑定在一起
         glBindAttribLocation(self->_program, (GLuint) idx, [obj cStringUsingEncoding:NSUTF8StringEncoding]);
     }];
     
@@ -72,8 +74,10 @@
         return nil;
     }
     
+    //参考《OpenGL es 3.0编程指南》 98页。这里是第3种方式
     NSMutableDictionary *uniformMap = [[NSMutableDictionary alloc] initWithCapacity:uniformNames.count];
     for (NSString *uniformName in uniformNames) {
+        //如果已经绑定，返回对应的索引，否则，返回通用的索引
         GLuint location = glGetUniformLocation(_program, [uniformName cStringUsingEncoding:NSUTF8StringEncoding]);
         uniformMap[uniformName] = @(location);
     }

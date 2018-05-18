@@ -22,6 +22,7 @@
 		3A8DE29C20AAAFA9001D353C /* fileUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A8DE29920AAAFA9001D353C /* fileUtil.m */; };
 		3A8DE2A020AABA53001D353C /* ShaderUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A8DE29F20AABA53001D353C /* ShaderUtil.m */; };
 		3A8DE2A320AABAFA001D353C /* ShaderModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A8DE2A220AABAFA001D353C /* ShaderModel.m */; };
+		3A8DE2A920AC3C39001D353C /* Shaders.json in Resources */ = {isa = PBXBuildFile; fileRef = 3A8DE2A820AC3C39001D353C /* Shaders.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,6 +71,7 @@
 		3A8DE29F20AABA53001D353C /* ShaderUtil.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ShaderUtil.m; sourceTree = "<group>"; };
 		3A8DE2A120AABAFA001D353C /* ShaderModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderModel.h; sourceTree = "<group>"; };
 		3A8DE2A220AABAFA001D353C /* ShaderModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ShaderModel.m; sourceTree = "<group>"; };
+		3A8DE2A820AC3C39001D353C /* Shaders.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Shaders.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -158,6 +160,7 @@
 		3A8DE28F20AA7618001D353C /* Shaders */ = {
 			isa = PBXGroup;
 			children = (
+				3A8DE2A820AC3C39001D353C /* Shaders.json */,
 				3A8DE29020AA7618001D353C /* brush.vsh */,
 				3A8DE29120AA7618001D353C /* brush.fsh */,
 			);
@@ -282,6 +285,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3A8DE2A920AC3C39001D353C /* Shaders.json in Resources */,
 				3A8DE29220AA7618001D353C /* brush.vsh in Resources */,
 				3A8DE26720AA74C5001D353C /* LaunchScreen.storyboard in Resources */,
 				3A8DE26420AA74C5001D353C /* Assets.xcassets in Resources */,

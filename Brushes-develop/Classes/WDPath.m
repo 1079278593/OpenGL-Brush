@@ -719,15 +719,15 @@ typedef struct {
     float           pB = location.z;
     float           pDelta = (pB - pA);
 	float           f, distance = WDDistance(lastLocation.CGPoint, location.CGPoint);//两点的距离
-	CGPoint         vector = WDSubtractPoints(location.CGPoint, lastLocation.CGPoint);//x轴和y轴相对距离
+	CGPoint         vector = WDSubtractPoints(location.CGPoint, lastLocation.CGPoint);//两个点：x轴上距离和y轴上距离，向量
 	CGPoint         unitVector = CGPointMake(1.0f, 1.0f);
-	float           vectorAngle = atan2(vector.y, vector.x);
+	float           vectorAngle = atan2(vector.y, vector.x);//两点组成的向量对应角度
 	float           step, pressureStep, pressure = pA;
     WDBrush         *brush = self.brush;
     float           weight = scale_ * (self.limitBrushSize ? 50 : brush.weight.value);
     
 	if (distance > 0.0f) {
-		unitVector = WDMultiplyPointScalar(vector, 1.0f / distance);//单位向量
+		unitVector = WDMultiplyPointScalar(vector, 1.0f / distance);//两个点组成的向量的：单位向量
 	}
     
     //起始点 如果remainder_为0，则值为lastLocation的值，否则加上remainder_的值作为偏移量
@@ -796,7 +796,7 @@ typedef struct {
     if (self.nodes.count == 1) {
         [self paintStamp:randomizer];
     } else {
-        NSArray     *points = [self flattenedPoints];
+        NSArray     *points = [self flattenedPoints];//获取点
         NSInteger   numPoints = points.count;
         NSLog(@"绘制点数:%ld",(long)numPoints);
         for (NSInteger ix = 0; ix < numPoints - 1; ix++) {

@@ -64,16 +64,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Classes/PaintingView.m"
-            timestampString = "548069270.567866"
+            timestampString = "548241265.3537101"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "164"
-            endingLineNumber = "164"
-            landmarkName = "-layoutSubviews"
+            startingLineNumber = "600"
+            endingLineNumber = "600"
+            landmarkName = "-renderLineFromPoint:toPoint:"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

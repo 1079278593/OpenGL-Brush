@@ -172,7 +172,7 @@ static NSString *WDUUIDKey = @"uuid";
     UIGraphicsPopContext();
 	CGContextRelease(context);
     free(data);
-    
+    //笔刷图片这里生成
     return result;
 }
 

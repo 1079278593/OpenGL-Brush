@@ -1,0 +1,11 @@
+{
+	"brush" : {
+		"vertex" : "brush",
+		"fragment" : "brush",
+		"attributes" : ["a_position", "a_texCoord"],
+		"uniforms" : ["u_mvpMatrix", "u_color", "u_alpha", "u_texture", "u_scale"]
+	},
+
+}
+
+
