@@ -992,6 +992,7 @@ NSString *WDActiveLayerChangedNotification = @"WDActiveLayerChangedNotification"
 
 - (GLuint) activePaintTexture
 {
+    //生成mask?
     if (!activePaintTexture_) {
         activePaintTexture_ = [self generateTexture:nil deepColor:[WDPainting supportsDeepColor]];
     }

@@ -13,11 +13,15 @@
 
 #import "gl_matrix.h"
 #import "ShaderModel.h"
+#import "WDUtilities.h"
+#import "UIImage+Mask.h"
 
-#define KBrushOpacity        (1.0 / 3.0)
-#define KBrushPixelStep        30    //图章间的间距
-#define KBrushScale            2    //缩放倍数
-#define KBrushSize             100  //正方形图章：边长
+//#define KStrokScale            2      //缩放倍数
+#define KOpenFingerStroke       NO      //默认不开启
+#define KStrokeStep             50.0    //图章间的间距,单位是像素(pixel)
+#define KStrokeColor            [UIColor lightGrayColor]
+#define KStrokeWidth            80.0    //正方形图章：边长
+#define KStrokeOpacity          0.8     //80%透明度
 
 // Texture
 typedef struct {
@@ -28,7 +32,8 @@ typedef struct {
 typedef struct {
     GLfloat     x, y, z;
     GLfloat     s, t;
-//    GLfloat     a;
+//    GLfloat     alpha;
+    GLfloat     angle;
 } VertexData;
 
 @interface PaintingView() {
@@ -44,22 +49,16 @@ typedef struct {
     GLuint depthRenderbuffer;
     
     TextureInfo brushTexture;     // brush texture
-    GLfloat brushColor[4];          // brush color
+    TextureInfo maskTexture;
     
-    // Shader objects
-    GLuint vertexShader;
-    GLuint fragmentShader;
-    GLuint shaderProgram;
-    
-    // Buffer Objects
-    GLuint vboId;
-    
-    BOOL initialized;
+    BOOL initialized;//初始状态
     
     CGPoint startPoint;
+    CGPoint movePoint;
     CGPoint endPoint;
     
-    NSDictionary *shaders;
+    NSDictionary *shaders;//存储所有着色器
+    
 }
 
 @property (nonatomic, strong) EAGLContext *context;
@@ -70,8 +69,6 @@ typedef struct {
 @implementation PaintingView
 
 #pragma mark - Life Cycle
-
-
 
 - (id)init {
     self = [super init];
@@ -90,8 +87,16 @@ typedef struct {
             return nil;
         }
         
-        // Set the view's scale factor as you wish
+        // Set the view's scale factor as you wish:渲染的倍数
         self.contentScaleFactor = [[UIScreen mainScreen] scale];
+        
+        //stroke 设置
+        self.openFingerStroke = KOpenFingerStroke;
+        self.strokeColor = KStrokeColor;
+        self.strokeStep = KStrokeStep;
+        self.strokeWidth = KStrokeWidth;
+        self.strokeAlpha = KStrokeOpacity;
+        
         
     }
     
@@ -112,13 +117,11 @@ typedef struct {
         [self resizeFromLayer:(CAEAGLLayer*)self.layer];
     }
     
-    [self erase];
+    [self cleanup];
 }
 
 - (BOOL)resizeFromLayer:(CAEAGLLayer *)layer {
-    
-    ShaderModel *brushShader = [self getShader:@"brush"];
-    
+        
     // Allocate color buffer backing based on the current layer size
     glBindRenderbuffer(GL_RENDERBUFFER, viewRenderbuffer);
     [self.context renderbufferStorage:GL_RENDERBUFFER fromDrawable:layer];
@@ -162,12 +165,6 @@ typedef struct {
         glDeleteTextures(1, &brushTexture.id);
         brushTexture.id = 0;
     }
-    // vbo
-    if (vboId) {
-        glDeleteBuffers(1, &vboId);
-        vboId = 0;
-    }
-    
     // tear down context
     if ([EAGLContext currentContext] == self.context)
         [EAGLContext setCurrentContext:nil];
@@ -199,9 +196,6 @@ typedef struct {
     // Setup the view port in Pixels
     glViewport(0, 0, backingWidth, backingHeight);
     
-    // Create a Vertex Buffer Object to hold our data
-    glGenBuffers(1, &vboId);
-    
     // Load shaders
     [self loadShaders];
     
@@ -214,6 +208,7 @@ typedef struct {
     return YES;
 }
 
+//加载着色器
 - (void)loadShaders {
     
     if (shaders) {
@@ -256,110 +251,267 @@ typedef struct {
     
 }
 
+//设置‘统一变量’
 - (void)setupAttributes {
     
     ShaderModel *brushShader = [self getShader:@"brush"];
     
-    //设置‘统一变量’
     glUseProgram(brushShader.program);
-    
-    // Load the brush texture
-    brushTexture = [self textureFromName:@"snow.png"];
-    
-    // the brush texture will be bound to texture unit 0
-    glUniform1i([brushShader locationForUniform:@"u_texture"], 0);
     
     // viewing matrices
     [self setMVPMatrix];
     
-    glUniform1f([brushShader locationForUniform:@"u_alpha"], 0.8);
+    glUniform1f([brushShader locationForUniform:@"u_alpha"], self.strokeAlpha);
     glUniform1f([brushShader locationForUniform:@"u_scale"], 1.5);
     
-    // initialize brush color
-//    brushColor[0] = 1 * kBrushOpacity;
-//    brushColor[1] = 1 * kBrushOpacity;
-//    brushColor[2] = 1 * kBrushOpacity;
-//    brushColor[3] = kBrushOpacity;
-//    glUniform4fv([brushShader locationForUniform:@"u_color"], 1, brushColor);
+    //加载笔刷图片:eye.png、snow.png、circle.png、circleLine.png、closelyCircle.png、crossLine.png、sparseCircle.png、starPoint.png、
+    NSString *brushName = @"snow.png";
+    brushTexture = [self textureFromName:[UIImage imageNamed:brushName]];
+    // the brush texture will be bound to texture unit 0
+    glUniform1i([brushShader locationForUniform:@"u_texture"], 0);
+    
+    maskTexture = [self textureFromName:[UIImage circleMaskWithSize:100]];
+    glUniform1i([brushShader locationForUniform:@"u_mask"], 1);
+    
+//    //激活纹理单元，以便后续glBindTexture调用将纹理绑定到‘当前活动单元’
+    glActiveTexture(GL_TEXTURE0);
+    // Bind the texture name.
+    glBindTexture(GL_TEXTURE_2D, brushTexture.id);
+    
+    
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, maskTexture.id);
 
 }
 
+//设置投影矩阵
 - (void)setMVPMatrix {
     
     ShaderModel *brushShader = [self getShader:@"brush"];
     
+/**
     //1.坐标转换：屏幕点坐标值在-1到1之间
     //backingWidth和backingHeight在调用glGetRenderbufferParameteriv时被赋值。(arc4random()%10+1)
-//    float aspect = (GLfloat)backingWidth/(GLfloat)backingHeight;
-//    GLKMatrix4 projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(100.0), aspect, 1.0f, 1.0f);//透视投影变换，第一个参数fovyRadius，（fov:视野、视场），y方向，一个锥形角度，角度越大，看到范围越大，一般设置45度
-//    GLKMatrix4 modelViewMatrix = GLKMatrix4Translate(GLKMatrix4Identity, 0.0f, 0.0f, -3.0f);; // this sample uses a constant identity modelView matrix
-//    GLKMatrix4 mvpMatrix = GLKMatrix4Multiply(projectionMatrix, modelViewMatrix);
+    float aspect = (GLfloat)backingWidth/(GLfloat)backingHeight;
+    GLKMatrix4 projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(100.0), aspect, 1.0f, 1.0f);//透视投影变换，第一个参数fovyRadius，（fov:视野、视场），y方向，一个锥形角度，角度越大，看到范围越大，一般设置45度
+    GLKMatrix4 modelViewMatrix = GLKMatrix4Translate(GLKMatrix4Identity, 0.0f, 0.0f, -3.0f);; // this sample uses a constant identity modelView matrix
+    GLKMatrix4 mvpMatrix = GLKMatrix4Multiply(projectionMatrix, modelViewMatrix);
     
-//2.坐标转换：屏幕点为屏幕像素大小
+    //2.坐标转换：屏幕点为屏幕像素大小
 //    GLKMatrix4 projectionMatrix = GLKMatrix4MakeOrtho(0, (GLfloat)backingWidth, 0, (GLfloat)backingHeight, -1, 1);
 //    GLKMatrix4 mvpMatrix = GLKMatrix4Multiply(projectionMatrix, GLKMatrix4Identity);
     
-    //3.坐标转换：屏幕点为屏幕像素大小
-    GLfloat proj[16], effectiveProj[16],final[16];
-    // setup projection matrix (orthographic)
-    mat4f_LoadOrtho(0, (GLuint) backingWidth, 0, (GLuint) backingHeight, -1.0f, 1.0f, proj);
-    mat4f_LoadCGAffineTransform(effectiveProj, CGAffineTransformIdentity);
-    mat4f_MultiplyMat4f(proj, effectiveProj, final);
+*/
     
-    glUniformMatrix4fv([brushShader locationForUniform:@"u_mvpMatrix"], 1, GL_FALSE, final);
+    //3.坐标转换：屏幕点为屏幕像素大小
+    GLfloat orthoProj[16], effectTransform[16], finalProj[16];
+    mat4f_LoadOrtho(0, (GLuint) backingWidth, 0, (GLuint) backingHeight, -1.0f, 1.0f, orthoProj);// setup projection matrix (orthographic)
+    mat4f_LoadCGAffineTransform(effectTransform, CGAffineTransformIdentity);
+    mat4f_MultiplyMat4f(orthoProj, effectTransform, finalProj);
+    glUniformMatrix4fv([brushShader locationForUniform:@"u_mvpMatrix"], 1, GL_FALSE, finalProj);
+    
 }
 
-// Create a texture from an image
-- (TextureInfo)textureFromName:(NSString *)name {
+//设置纹理
+- (TextureInfo)textureFromName:(UIImage *)image {
     
-    CGImageRef brushImage;
-    CGContextRef brushContext;
-    GLubyte *brushData;
-    size_t width, height;
-    GLuint texId;
-    TextureInfo texture;
+    TextureInfo texture = {0,0,0};
     
-    // First create a UIImage object from the data in a image file, and then extract the Core Graphics image
-    brushImage = [UIImage imageNamed:name].CGImage;
-    
-    // Get the width and height of the image
-    width = CGImageGetWidth(brushImage)*2;
-    height = CGImageGetHeight(brushImage)*2;
-    
-    // Make sure the image exists
-    if(brushImage) {
-        // Allocate  memory needed for the bitmap context
-        brushData = (GLubyte *) calloc(width * height * 4, sizeof(GLubyte));
-        // Use  the bitmatp creation function provided by the Core Graphics framework.
-        brushContext = CGBitmapContextCreate(brushData, width, height, 8, width * 4, CGImageGetColorSpace(brushImage), kCGImageAlphaPremultipliedLast);
-        //垂直翻转坐标系
-        CGContextTranslateCTM(brushContext, 0, height);
-        CGContextScaleCTM(brushContext, 1.0, -1.0);
-        CGContextDrawImage(brushContext, CGRectMake(0, 0, width, height), brushImage);
-
-        // After you create the context, you can draw the  image to the context.
-        CGContextDrawImage(brushContext, CGRectMake(0.0, 0.0, (CGFloat)width, (CGFloat)height), brushImage);
-        // You don't need the context at this point, so you need to release it to avoid memory leaks.
-        CGContextRelease(brushContext);
-        // Use OpenGL ES to generate a name for the texture.
-        glGenTextures(1, &texId);
-        //激活纹理单元，以便后续glBindTexture调用将纹理绑定到‘当前活动单元’
-        glActiveTexture(GL_TEXTURE0);
-        // Bind the texture name.
-        glBindTexture(GL_TEXTURE_2D, texId);
-        // Set the texture parameters to use a minifying filter and a linear filer (weighted average)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        // Specify a 2D texture image, providing the a pointer to the image data in memory
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (int)width, (int)height, 0, GL_RGBA, GL_UNSIGNED_BYTE, brushData);
-        // Release  the image data; it's no longer needed
-        free(brushData);
-        
-        texture.id = texId;
-        texture.width = (int)width;
-        texture.height = (int)height;
+    //加载图片
+    image = [self imageWithColor:image color:[UIColor redColor]];
+    CGImageRef brushImage = image.CGImage;
+    size_t width = CGImageGetWidth(brushImage);
+    size_t height = CGImageGetHeight(brushImage);
+    if (brushImage == nil) {
+        return texture;
     }
     
+    size_t channelCount = CGImageGetBitsPerPixel(brushImage) / 8;//控制颜色空间colorSpaceFormat
+    
+    GLenum colorSpaceFormat = GL_ALPHA;//透明度图
+    if (channelCount == 2) colorSpaceFormat = GL_LUMINANCE_ALPHA;//带透明度的灰度图
+    if (channelCount == 4) colorSpaceFormat = GL_RGBA;//RGBA
+    
+    // Allocate  memory needed for the bitmap context
+    GLubyte *brushData = (GLubyte *) calloc(width * height * channelCount, sizeof(GLubyte));
+    // Use  the bitmatp creation function provided by the Core Graphics framework.
+    CGContextRef brushContext = CGBitmapContextCreate(brushData, width, height, 8, width * channelCount, CGImageGetColorSpace(brushImage), kCGImageAlphaPremultipliedLast);
+    //垂直翻转坐标系
+    CGContextTranslateCTM(brushContext, 0, height);
+    CGContextScaleCTM(brushContext, 1.0, -1.0);
+    // After you create the context, you can draw the  image to the context.
+    CGContextDrawImage(brushContext, CGRectMake(0.0, 0.0, (CGFloat)width, (CGFloat)height), brushImage);
+    // You don't need the context at this point, so you need to release it to avoid memory leaks.
+    CGContextRelease(brushContext);
+    
+    // Use OpenGL ES to generate a name for the texture.
+    GLuint texId;
+    glGenTextures(1, &texId);
+    glBindTexture(GL_TEXTURE_2D, texId);
+    // Set the texture parameters to use a minifying filter and a linear filer (weighted average)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, 0 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);//前面4个配置或者这1个配置,前4个可以设置mip贴图
+    
+    // Specify a 2D texture image, providing the a pointer to the image data in memory
+    glTexImage2D(GL_TEXTURE_2D, 0, colorSpaceFormat, (int)width, (int)height, 0, colorSpaceFormat, GL_UNSIGNED_BYTE, brushData);
+    // Release  the image data; it's no longer needed
+    free(brushData);
+    
+    texture.id = texId;
+    texture.width = (int)width;
+    texture.height = (int)height;
+    
     return texture;
+}
+
+//去掉背景色
+- (UIImage *)imageWithColor:(UIImage *)image color:(UIColor *)color
+{
+    UIGraphicsBeginImageContextWithOptions(image.size, NO, image.scale);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    CGContextTranslateCTM(context, 0, image.size.height);
+    CGContextScaleCTM(context, 1.0, -1.0);
+    CGContextSetBlendMode(context, kCGBlendModeNormal);
+    CGRect rect = CGRectMake(0, 0, image.size.width, image.size.height);
+    CGContextClipToMask(context, rect, image.CGImage);
+    [color setFill];
+    CGContextFillRect(context, rect);
+    UIImage*newImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return newImage;
+}
+
+#pragma mark - draw line
+- (void)renderLine{
+    
+    CGFloat step = self.strokeStep;
+    CGFloat distance = WDDistance(startPoint, endPoint);
+    
+    int count = (int)(distance/step);
+    
+//    NSLog(@"render,插值点数量：%d",count);
+    if (count <= 1 && WDDistance(startPoint, endPoint)>step) {
+        count = 1;
+    }
+
+    [self renderVertices:[self generateVertex:count] count:count];
+}
+
+- (void)renderPoint {
+    NSLog(@"render point");
+    [self renderVertices:[self generateVertex:1] count:1];
+}
+
+- (void)renderVertices:(VertexData *)vertice count:(int)count {
+    
+    ShaderModel *brushShader = [self getShader:@"brush"];
+    [EAGLContext setCurrentContext:self.context];
+    glBindFramebuffer(GL_FRAMEBUFFER, viewFramebuffer);
+    
+    glEnableVertexAttribArray(0);//这里的location，查看brush着色器说明
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), &vertice[0].x);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), &vertice[0].s);
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(VertexData), &vertice[0].angle);
+    
+    // Draw
+    glUseProgram(brushShader.program);
+    glDrawArrays(GL_TRIANGLES, 0, count*6);
+    
+    // Display the buffer
+    glBindRenderbuffer(GL_RENDERBUFFER, viewRenderbuffer);
+    [self.context presentRenderbuffer:GL_RENDERBUFFER];
+}
+
+#pragma mark 顶点设置
+- (CGPoint)pointSuitable:(CGPoint)point {
+    //屏幕触摸的坐标，必须转换成分辨率坐标，即乘以layer的：contentScaleFactor
+    //同时，需要从左上角坐标原点转为左下角为坐标原点
+    CGRect bounds = [self bounds];
+    point.y = bounds.size.height - point.y;
+    point.x *= self.contentScaleFactor;
+    point.y *= self.contentScaleFactor;
+    return point;
+}
+
+- (VertexData *)generateVertex:(int)count {
+    
+    CGFloat width = self.strokeWidth;
+    CGPoint start = startPoint;
+    CGPoint end = endPoint;
+    
+    VertexData *vertices = calloc(sizeof(VertexData), count * 6);
+    
+    int n = 0;
+    for (int i = 0; i<count; i++) {
+        
+        CGPoint centerPoint = CGPointZero;
+        centerPoint.x = start.x + (end.x - start.x) * ((GLfloat)i / (GLfloat)count);
+        centerPoint.y = start.y + (end.y - start.y) * ((GLfloat)i / (GLfloat)count);
+        
+        
+        GLfloat angle = (float)(arc4random()%100+1);//
+        
+        //左下
+        vertices[n].x = centerPoint.x - width/2.0;
+        vertices[n].y = centerPoint.y - width/2.0;
+        vertices[n].z = 0;
+        vertices[n].s = 0.0;
+        vertices[n].t = 0.0;
+        vertices[n].angle = angle;
+        n++;
+        
+        //右下
+        vertices[n].x = centerPoint.x + width/2.0;
+        vertices[n].y = centerPoint.y - width/2.0;
+        vertices[n].z = 0;
+        vertices[n].s = 1.0;
+        vertices[n].t = 0.0;
+        vertices[n].angle = angle;
+        n++;
+        
+        //右上
+        vertices[n].x = centerPoint.x + width/2.0;
+        vertices[n].y = centerPoint.y + width/2.0;
+        vertices[n].z = 0;
+        vertices[n].s = 1.0;
+        vertices[n].t = 1.0;
+        vertices[n].angle = angle;
+        n++;
+        
+        //第二个三角形
+        //右上
+        vertices[n].x = centerPoint.x + width/2.0;
+        vertices[n].y = centerPoint.y + width/2.0;
+        vertices[n].z = 0;
+        vertices[n].s = 1.0;
+        vertices[n].t = 1.0;
+        vertices[n].angle = angle;
+        n++;
+        
+        //左上
+        vertices[n].x = centerPoint.x - width/2.0;
+        vertices[n].y = centerPoint.y + width/2.0;
+        vertices[n].z = 0;
+        vertices[n].s = 0.0;
+        vertices[n].t = 1.0;
+        vertices[n].angle = angle;
+        n++;
+        
+        //左下
+        vertices[n].x = centerPoint.x - width/2.0;
+        vertices[n].y = centerPoint.y - width/2.0;
+        vertices[n].z = 0;
+        vertices[n].s = 0.0;
+        vertices[n].t = 0.0;
+        vertices[n].angle = angle;
+        n++;
+    }
+    return vertices;
 }
 
 #pragma mark - Touch Event
@@ -367,53 +519,49 @@ typedef struct {
     return YES;
 }
 
-// Handles the start of a touch
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
     NSLog(@"touchesBegan");
-    CGRect bounds = [self bounds];
     UITouch *touch = [[event touchesForView:self] anyObject];
-
-    // Convert touch point from UIView referential to OpenGL one (upside-down flip)
-    startPoint = [touch locationInView:self];
-    startPoint.y = bounds.size.height - startPoint.y;
-    
+    startPoint = [self pointSuitable:[touch locationInView:self]];
 }
 
-// Handles the continuation of a touch.
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    CGRect bounds = [self bounds];
+    NSLog(@"touchesMoved");
     UITouch *touch = [[event touchesForView:self] anyObject];
+    endPoint = [self pointSuitable:[touch locationInView:self]];
+    NSLog(@"\nforce:%f\npossibleForce:%f",touch.force,touch.maximumPossibleForce);
+//    NSLog(@"\nradius:%f\nradiusTolerance:%f",touch.majorRadius,touch.majorRadiusTolerance);
     
-    // Convert touch point from UIView referential to OpenGL one (upside-down flip)
-    endPoint = [touch locationInView:self];
-    endPoint.y = bounds.size.height - endPoint.y;
+    if (self.openFingerStroke) {
+        self.strokeAlpha = 0.2+touch.force/touch.maximumPossibleForce;
+        self.strokeWidth = (touch.majorRadius+touch.majorRadiusTolerance)*3;
+    }
+
+    //更新笔刷的一些配置：透明度等
+    ShaderModel *brushShader = [self getShader:@"brush"];
+    glUseProgram(brushShader.program);
+    glUniform1f([brushShader locationForUniform:@"u_alpha"], self.strokeAlpha);
     
-    NSLog(@"touchesMoved:%@",NSStringFromCGPoint(endPoint));
-    // Render the stroke
-    [self renderLineFromPoint:startPoint toPoint:endPoint];
-    
-    startPoint = endPoint;
-    
+    //绘制
+    [self renderLine];
+    if (WDDistance(startPoint, endPoint)>self.strokeStep) {
+        startPoint = endPoint;
+    }
 }
 
-// Handles the end of a touch event when the touch is a tap.
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
     NSLog(@"touchesEnded");
-    CGRect bounds = [self bounds];
     UITouch *touch = [[event touchesForView:self] anyObject];
     
-    endPoint = [touch locationInView:self];
-    endPoint.y = bounds.size.height - endPoint.y;
-    
-//    [self drawRectangular];
-//    [self renderLineFromPoint:startPoint toPoint:endPoint];
-    
+    endPoint = [self pointSuitable:[touch locationInView:self]];
+    if ([NSStringFromCGPoint(startPoint) isEqualToString:NSStringFromCGPoint(endPoint)]) {
+        [self renderPoint];
+    }
 }
 
-// Handles the end of a touch event.
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
     // If appropriate, add code necessary to save the state of the application.
@@ -423,8 +571,7 @@ typedef struct {
 
 #pragma mark - Public Method
 // Erases the screen
-- (void)erase
-{
+- (void)cleanup {
     // Make sure to start with a cleared buffer
     [EAGLContext setCurrentContext:self.context];
     
@@ -432,192 +579,6 @@ typedef struct {
     glBindFramebuffer(GL_FRAMEBUFFER, viewFramebuffer);
     glClearColor(1.0, 1.0, 1.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
-    
-    // Display the buffer
-    glBindRenderbuffer(GL_RENDERBUFFER, viewRenderbuffer);
-    [self.context presentRenderbuffer:GL_RENDERBUFFER];
-}
-
-#pragma mark - draw line
-// Drawings a line onscreen based on where the user touches
-- (void)renderLineFromPoint:(CGPoint)start toPoint:(CGPoint)end {
-    
-    ShaderModel *brushShader = [self getShader:@"brush"];
-    [EAGLContext setCurrentContext:self.context];
-    glBindFramebuffer(GL_FRAMEBUFFER, viewFramebuffer);
-    
-    VertexData *vertices = [self getVertices:start toPoint:end];
-    
-    glEnableVertexAttribArray(0);//这里的location，查看brush着色器说明
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), &vertices[0].x);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), &vertices[0].s);
-    
-    // Draw
-    glUseProgram(brushShader.program);
-    
-    float xd = (start.x - end.x);
-    float yd = (start.y - end.y);
-    CGFloat distance = sqrt(xd * xd + yd * yd);
-    
-    int count = (int)(distance/KBrushPixelStep);//插值数量
-    
-    glDrawArrays(GL_TRIANGLES, 0, count*6);
-    
-    // Display the buffer
-    glBindRenderbuffer(GL_RENDERBUFFER, viewRenderbuffer);
-    [self.context presentRenderbuffer:GL_RENDERBUFFER];
-    
-}
-
-- (VertexData *)getVertices:(CGPoint)start toPoint:(CGPoint)end {
-    
-    CGFloat width = KBrushSize;
-    CGFloat step = KBrushPixelStep;
-    
-    float xd = (start.x - end.x);
-    float yd = (start.y - end.y);
-    CGFloat distance = sqrt(xd * xd + yd * yd);
-    
-    int count = (int)(distance/step);//插值数量
-
-    VertexData *vertexData = calloc(sizeof(VertexData), count * 6);
-    int n = 0;
-    for (int i = 0; i<count; i++) {
-        
-        CGPoint centerPoint = CGPointZero;
-        centerPoint.x = start.x + (end.x - start.x) * ((GLfloat)i / (GLfloat)count);
-        centerPoint.y = start.y + (end.y - start.y) * ((GLfloat)i / (GLfloat)count);
-        
-        //左下
-        vertexData[n].x = centerPoint.x - width/2.0;
-        vertexData[n].y = centerPoint.y - width/2.0;
-        vertexData[n].z = 0;
-        vertexData[n].s = 0.0;
-        vertexData[n].t = 0.0;
-        n++;
-        
-        //右下
-        vertexData[n].x = centerPoint.x + width/2.0;
-        vertexData[n].y = centerPoint.y - width/2.0;
-        vertexData[n].z = 0;
-        vertexData[n].s = 1.0;
-        vertexData[n].t = 0.0;
-        n++;
-        
-        //右上
-        vertexData[n].x = centerPoint.x + width/2.0;
-        vertexData[n].y = centerPoint.y + width/2.0;
-        vertexData[n].z = 0;
-        vertexData[n].s = 1.0;
-        vertexData[n].t = 1.0;
-        n++;
-        
-        //第二个三角形
-        //右上
-        vertexData[n].x = centerPoint.x + width/2.0;
-        vertexData[n].y = centerPoint.y + width/2.0;
-        vertexData[n].z = 0;
-        vertexData[n].s = 1.0;
-        vertexData[n].t = 1.0;
-        n++;
-        
-        //左上
-        vertexData[n].x = centerPoint.x - width/2.0;
-        vertexData[n].y = centerPoint.y + width/2.0;
-        vertexData[n].z = 0;
-        vertexData[n].s = 0.0;
-        vertexData[n].t = 1.0;
-        n++;
-        
-        //左下
-        vertexData[n].x = centerPoint.x - width/2.0;
-        vertexData[n].y = centerPoint.y - width/2.0;
-        vertexData[n].z = 0;
-        vertexData[n].s = 0.0;
-        vertexData[n].t = 0.0;
-        n++;
-    }
-    return vertexData;
-}
-
-- (void)drawRectangular {
-    
-    ShaderModel *brushShader = [self getShader:@"brush"];
-    [EAGLContext setCurrentContext:self.context];
-    glBindFramebuffer(GL_FRAMEBUFFER, viewFramebuffer);
-    
-    //-1 到 1  方式
-//    GLfloat vertices[] = {
-//        //三角形是哪部分，纹理坐标就取样相同的,就像七巧板拼起一个正方形
-//        -0.5f, -0.5f, 0.0f,  0.0, 0.0,//左下
-//        0.5f, -0.5f, 0.0f,   1.0, 0.0,//右下
-//        0.5f,  0.5f, 0.0f,   1.0, 1.0,//右上
-//
-//        0.5f,  0.5f, 0.0f,   1.0, 1.0,//右上
-//        -0.5f, 0.5f, 0.0f,   0.0, 1.0,//左上
-//        -0.5f, -0.5f, 0.0f,  0.0, 0.0,//左下
-//    };
-    
-    //屏幕坐标方式
-//    GLfloat vertices[] = {
-//        //三角形是哪部分，纹理坐标就取样相同的,就像七巧板拼起一个正方形
-//        0.0f, 0.0f, 0.0f,  0.0, 0.0,//左下
-//        100.0, 0.0f, 0.0f,  1.0, 0.0,//右下
-//        100.0, 100.0, 0.0f,  1.0, 1.0,//右上
-//
-//        100.0, 100.0, 0.0f,  1.0, 1.0,//右上
-//        0.0f, 100.0, 0.0f,  0.0, 1.0,//左上
-//        0.0f, 0.0f, 0.0f,  0.0, 0.0,//左下
-//
-//        110.0, 110.0, 0.0f,  0.0, 0.0,//左下
-//        210.0, 110.0, 0.0f,  1.0, 0.0,//右下
-//        210.0, 210.0, 0.0f,  1.0, 1.0,//右上
-//
-//        210.0, 210.0, 0.0f,  1.0, 1.0,//右上
-//        110.0, 210.0, 0.0f,  0.0, 1.0,//左上
-//        110.0, 110.0, 0.0f,  0.0, 0.0,//左下
-//    };
-    
-    // Load data to the Vertex Buffer Object
-//    glBindBuffer(GL_ARRAY_BUFFER, vboId);
-//    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-//    glEnableVertexAttribArray(0);//这里的location，查看brush着色器说明
-//    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(GLfloat), ( const void * ) 0);
-//    glEnableVertexAttribArray(1);
-//    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5*sizeof(GLfloat), ( const void * ) ( 3 * sizeof ( GLfloat ) ));
-    
-    //方法2
-    
-    CGPoint start = CGPointMake(0, 0);
-    CGPoint end = CGPointMake(300, 400);
-    VertexData *vertices = [self getVertices:start toPoint:end];
-    
-    glEnableVertexAttribArray(0);//这里的location，查看brush着色器说明
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), &vertices[0].x);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), &vertices[0].s);
-
-    
-    
-    
-    //纹理
-    // Load the brush texture
-//    brushTexture = [self textureFromName:@"snow.png"];
-//
-//    // the brush texture will be bound to texture unit 0
-//    glUniform1i([brushShader locationForUniform:@"u_texture"], 0);
-    
-    // Draw
-    glUseProgram(brushShader.program);
-    
-    float xd = (start.x - end.x);
-    float yd = (start.y - end.y);
-    CGFloat distance = sqrt(xd * xd + yd * yd);
-    
-    int count = (int)(distance/KBrushPixelStep);//插值数量
-    
-    glDrawArrays(GL_TRIANGLES, 0, count*6);
     
     // Display the buffer
     glBindRenderbuffer(GL_RENDERBUFFER, viewRenderbuffer);
@@ -650,7 +611,7 @@ typedef struct {
 }
 
 - (ShaderModel *)getShader:(NSString *)shaderKey {
-    NSLog(@"Paint: 获取着色器：%@",shaderKey);
+//    NSLog(@"Paint: 获取着色器：%@",shaderKey);
     [EAGLContext setCurrentContext:self.context];
     return shaders[shaderKey];
 }

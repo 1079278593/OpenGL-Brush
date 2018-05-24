@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3A01EB9720B69CA3002941CA /* UIImage+Mask.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A01EB9620B69CA3002941CA /* UIImage+Mask.m */; };
 		3A8DE25C20AA74C4001D353C /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A8DE25B20AA74C4001D353C /* AppDelegate.m */; };
 		3A8DE25F20AA74C4001D353C /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A8DE25E20AA74C4001D353C /* ViewController.m */; };
 		3A8DE26220AA74C4001D353C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3A8DE26020AA74C4001D353C /* Main.storyboard */; };
@@ -19,10 +20,21 @@
 		3A8DE29220AA7618001D353C /* brush.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 3A8DE29020AA7618001D353C /* brush.vsh */; };
 		3A8DE29320AA7618001D353C /* brush.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 3A8DE29120AA7618001D353C /* brush.fsh */; };
 		3A8DE29B20AAAFA9001D353C /* gl_matrix.c in Sources */ = {isa = PBXBuildFile; fileRef = 3A8DE29820AAAFA9001D353C /* gl_matrix.c */; };
-		3A8DE29C20AAAFA9001D353C /* fileUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A8DE29920AAAFA9001D353C /* fileUtil.m */; };
 		3A8DE2A020AABA53001D353C /* ShaderUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A8DE29F20AABA53001D353C /* ShaderUtil.m */; };
 		3A8DE2A320AABAFA001D353C /* ShaderModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A8DE2A220AABAFA001D353C /* ShaderModel.m */; };
 		3A8DE2A920AC3C39001D353C /* Shaders.json in Resources */ = {isa = PBXBuildFile; fileRef = 3A8DE2A820AC3C39001D353C /* Shaders.json */; };
+		3A8DE2CD20B506AF001D353C /* screen.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 3A8DE2C220B506AF001D353C /* screen.fsh */; };
+		3A8DE2CE20B506AF001D353C /* darken.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 3A8DE2C320B506AF001D353C /* darken.fsh */; };
+		3A8DE2CF20B506AF001D353C /* normal.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 3A8DE2C420B506AF001D353C /* normal.fsh */; };
+		3A8DE2D020B506AF001D353C /* lighten.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 3A8DE2C520B506AF001D353C /* lighten.fsh */; };
+		3A8DE2D120B506AF001D353C /* overlay.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 3A8DE2C620B506AF001D353C /* overlay.fsh */; };
+		3A8DE2D220B506AF001D353C /* difference.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 3A8DE2C720B506AF001D353C /* difference.fsh */; };
+		3A8DE2D320B506AF001D353C /* colorburn.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 3A8DE2C820B506AF001D353C /* colorburn.fsh */; };
+		3A8DE2D420B506AF001D353C /* blend.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 3A8DE2C920B506AF001D353C /* blend.vsh */; };
+		3A8DE2D520B506AF001D353C /* multiply.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 3A8DE2CA20B506AF001D353C /* multiply.fsh */; };
+		3A8DE2D620B506AF001D353C /* colordodge.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 3A8DE2CB20B506AF001D353C /* colordodge.fsh */; };
+		3A8DE2D720B506AF001D353C /* exclusion.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 3A8DE2CC20B506AF001D353C /* exclusion.fsh */; };
+		3A8DE2DA20B506E9001D353C /* WDUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A8DE2D820B506E9001D353C /* WDUtilities.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -43,6 +55,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3A01EB9520B69CA3002941CA /* UIImage+Mask.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIImage+Mask.h"; sourceTree = "<group>"; };
+		3A01EB9620B69CA3002941CA /* UIImage+Mask.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIImage+Mask.m"; sourceTree = "<group>"; };
 		3A8DE25720AA74C4001D353C /* MyBrush.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MyBrush.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3A8DE25A20AA74C4001D353C /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		3A8DE25B20AA74C4001D353C /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -64,14 +78,25 @@
 		3A8DE29020AA7618001D353C /* brush.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = brush.vsh; sourceTree = "<group>"; };
 		3A8DE29120AA7618001D353C /* brush.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = brush.fsh; sourceTree = "<group>"; };
 		3A8DE29520AAAFA9001D353C /* gl_matrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gl_matrix.h; sourceTree = "<group>"; };
-		3A8DE29620AAAFA9001D353C /* fileUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fileUtil.h; sourceTree = "<group>"; };
 		3A8DE29820AAAFA9001D353C /* gl_matrix.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gl_matrix.c; sourceTree = "<group>"; };
-		3A8DE29920AAAFA9001D353C /* fileUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = fileUtil.m; sourceTree = "<group>"; };
 		3A8DE29E20AABA53001D353C /* ShaderUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderUtil.h; sourceTree = "<group>"; };
 		3A8DE29F20AABA53001D353C /* ShaderUtil.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ShaderUtil.m; sourceTree = "<group>"; };
 		3A8DE2A120AABAFA001D353C /* ShaderModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderModel.h; sourceTree = "<group>"; };
 		3A8DE2A220AABAFA001D353C /* ShaderModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ShaderModel.m; sourceTree = "<group>"; };
 		3A8DE2A820AC3C39001D353C /* Shaders.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Shaders.json; sourceTree = "<group>"; };
+		3A8DE2C220B506AF001D353C /* screen.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = screen.fsh; sourceTree = "<group>"; };
+		3A8DE2C320B506AF001D353C /* darken.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = darken.fsh; sourceTree = "<group>"; };
+		3A8DE2C420B506AF001D353C /* normal.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = normal.fsh; sourceTree = "<group>"; };
+		3A8DE2C520B506AF001D353C /* lighten.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = lighten.fsh; sourceTree = "<group>"; };
+		3A8DE2C620B506AF001D353C /* overlay.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = overlay.fsh; sourceTree = "<group>"; };
+		3A8DE2C720B506AF001D353C /* difference.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = difference.fsh; sourceTree = "<group>"; };
+		3A8DE2C820B506AF001D353C /* colorburn.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = colorburn.fsh; sourceTree = "<group>"; };
+		3A8DE2C920B506AF001D353C /* blend.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = blend.vsh; sourceTree = "<group>"; };
+		3A8DE2CA20B506AF001D353C /* multiply.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = multiply.fsh; sourceTree = "<group>"; };
+		3A8DE2CB20B506AF001D353C /* colordodge.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = colordodge.fsh; sourceTree = "<group>"; };
+		3A8DE2CC20B506AF001D353C /* exclusion.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = exclusion.fsh; sourceTree = "<group>"; };
+		3A8DE2D820B506E9001D353C /* WDUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WDUtilities.m; sourceTree = "<group>"; };
+		3A8DE2D920B506E9001D353C /* WDUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WDUtilities.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -160,6 +185,7 @@
 		3A8DE28F20AA7618001D353C /* Shaders */ = {
 			isa = PBXGroup;
 			children = (
+				3A8DE2C120B506AF001D353C /* Blend */,
 				3A8DE2A820AC3C39001D353C /* Shaders.json */,
 				3A8DE29020AA7618001D353C /* brush.vsh */,
 				3A8DE29120AA7618001D353C /* brush.fsh */,
@@ -170,16 +196,36 @@
 		3A8DE29420AAAFA9001D353C /* Shader Utils */ = {
 			isa = PBXGroup;
 			children = (
-				3A8DE29620AAAFA9001D353C /* fileUtil.h */,
-				3A8DE29920AAAFA9001D353C /* fileUtil.m */,
 				3A8DE2A120AABAFA001D353C /* ShaderModel.h */,
 				3A8DE2A220AABAFA001D353C /* ShaderModel.m */,
 				3A8DE29E20AABA53001D353C /* ShaderUtil.h */,
 				3A8DE29F20AABA53001D353C /* ShaderUtil.m */,
 				3A8DE29520AAAFA9001D353C /* gl_matrix.h */,
 				3A8DE29820AAAFA9001D353C /* gl_matrix.c */,
+				3A8DE2D920B506E9001D353C /* WDUtilities.h */,
+				3A8DE2D820B506E9001D353C /* WDUtilities.m */,
+				3A01EB9520B69CA3002941CA /* UIImage+Mask.h */,
+				3A01EB9620B69CA3002941CA /* UIImage+Mask.m */,
 			);
 			path = "Shader Utils";
+			sourceTree = "<group>";
+		};
+		3A8DE2C120B506AF001D353C /* Blend */ = {
+			isa = PBXGroup;
+			children = (
+				3A8DE2C220B506AF001D353C /* screen.fsh */,
+				3A8DE2C320B506AF001D353C /* darken.fsh */,
+				3A8DE2C420B506AF001D353C /* normal.fsh */,
+				3A8DE2C520B506AF001D353C /* lighten.fsh */,
+				3A8DE2C620B506AF001D353C /* overlay.fsh */,
+				3A8DE2C720B506AF001D353C /* difference.fsh */,
+				3A8DE2C820B506AF001D353C /* colorburn.fsh */,
+				3A8DE2C920B506AF001D353C /* blend.vsh */,
+				3A8DE2CA20B506AF001D353C /* multiply.fsh */,
+				3A8DE2CB20B506AF001D353C /* colordodge.fsh */,
+				3A8DE2CC20B506AF001D353C /* exclusion.fsh */,
+			);
+			path = Blend;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -285,12 +331,23 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3A8DE2D220B506AF001D353C /* difference.fsh in Resources */,
 				3A8DE2A920AC3C39001D353C /* Shaders.json in Resources */,
 				3A8DE29220AA7618001D353C /* brush.vsh in Resources */,
+				3A8DE2D320B506AF001D353C /* colorburn.fsh in Resources */,
 				3A8DE26720AA74C5001D353C /* LaunchScreen.storyboard in Resources */,
 				3A8DE26420AA74C5001D353C /* Assets.xcassets in Resources */,
+				3A8DE2CD20B506AF001D353C /* screen.fsh in Resources */,
+				3A8DE2D120B506AF001D353C /* overlay.fsh in Resources */,
+				3A8DE2D720B506AF001D353C /* exclusion.fsh in Resources */,
 				3A8DE29320AA7618001D353C /* brush.fsh in Resources */,
+				3A8DE2CE20B506AF001D353C /* darken.fsh in Resources */,
+				3A8DE2D020B506AF001D353C /* lighten.fsh in Resources */,
 				3A8DE26220AA74C4001D353C /* Main.storyboard in Resources */,
+				3A8DE2CF20B506AF001D353C /* normal.fsh in Resources */,
+				3A8DE2D420B506AF001D353C /* blend.vsh in Resources */,
+				3A8DE2D520B506AF001D353C /* multiply.fsh in Resources */,
+				3A8DE2D620B506AF001D353C /* colordodge.fsh in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -319,8 +376,9 @@
 				3A8DE25F20AA74C4001D353C /* ViewController.m in Sources */,
 				3A8DE26A20AA74C5001D353C /* main.m in Sources */,
 				3A8DE28E20AA7510001D353C /* PaintingView.m in Sources */,
+				3A8DE2DA20B506E9001D353C /* WDUtilities.m in Sources */,
 				3A8DE2A020AABA53001D353C /* ShaderUtil.m in Sources */,
-				3A8DE29C20AAAFA9001D353C /* fileUtil.m in Sources */,
+				3A01EB9720B69CA3002941CA /* UIImage+Mask.m in Sources */,
 				3A8DE29B20AAAFA9001D353C /* gl_matrix.c in Sources */,
 				3A8DE25C20AA74C4001D353C /* AppDelegate.m in Sources */,
 			);

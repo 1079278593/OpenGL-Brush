@@ -2,8 +2,8 @@
 	"brush" : {
 		"vertex" : "brush",
 		"fragment" : "brush",
-		"attributes" : ["a_position", "a_texCoord"],
-		"uniforms" : ["u_mvpMatrix", "u_color", "u_alpha", "u_texture", "u_scale"]
+		"attributes" : ["a_position", "a_texCoord", "a_angle"],
+		"uniforms" : ["u_mvpMatrix", "u_color", "u_alpha", "u_texture", "u_mask", "u_scale"]
 	},
 
 }
