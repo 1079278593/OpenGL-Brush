@@ -16,7 +16,11 @@
 
 @property (nonatomic, strong) PaintingView *paintingView;
 @property (nonatomic, strong) UIButton *eraseButton;
+@property (nonatomic, strong) UIButton *snowButton;
+@property (nonatomic, strong) UIButton *circleButton;
+@property (nonatomic, strong) UIButton *otherButton;
 
+@property (nonatomic, strong) UISwitch *fingerSwitch;
 @property (nonatomic, strong) UISlider *strokeWidthSlider;
 @property (nonatomic, strong) UISlider *strokeAlphaSlider;
 @property (nonatomic, strong) UISlider *strokeStepSlider;
@@ -31,13 +35,23 @@
     self.paintingView.frame = self.view.frame;
     [self.view addSubview:self.paintingView];
     
-    self.eraseButton.frame = CGRectMake(0, 0, 80, 50);
-    self.eraseButton.center = CGPointMake(self.view.center.x, 35);
+    self.fingerSwitch.frame = CGRectMake(0, 20, 40, 40);
     
-    self.strokeStepSlider.frame = CGRectMake(10, KMainScreenHeight - 40, KMainScreenWidth-20, 40);
+    self.eraseButton.frame = CGRectMake(60, 10, 80, 50);
+    self.snowButton.frame = CGRectMake(120, 10, 80, 50);
+    self.circleButton.frame = CGRectMake(180, 10, 80, 50);
+    self.otherButton.frame = CGRectMake(240, 10, 80, 50);
+//    self.eraseButton.center = CGPointMake(self.view.center.x, 35);
+    
+    
+    self.strokeStepSlider.frame = CGRectMake(10, KMainScreenHeight - 40, KMainScreenWidth-20, 40);//布局：最下面
     self.strokeWidthSlider.frame = CGRectMake(10, CGRectGetMinY(self.strokeStepSlider.frame) - 40, KMainScreenWidth-20, 40);
     self.strokeAlphaSlider.frame = CGRectMake(10, CGRectGetMinY(self.strokeWidthSlider.frame) - 40, KMainScreenWidth-20, 40);
     
+    UILabel *title = [[UILabel alloc]init];
+    title.text = @"下面三个slider分别设置：alpha、width、step";
+    title.frame = CGRectMake(10, CGRectGetMinY(self.strokeAlphaSlider.frame) - 40, KMainScreenWidth-20, 20);
+    [self.view addSubview:title];
 }
 
 
@@ -48,6 +62,19 @@
 #pragma mark - Event
 - (void)eraseEvent:(UIButton *)button {
     [self.paintingView cleanup];
+}
+- (void)snowEvent:(UIButton *)button {
+    self.paintingView.strokeImageName = @"snow.png";
+}
+- (void)circleEvent:(UIButton *)button {
+    self.paintingView.strokeImageName = @"circle.png";
+}
+- (void)otherEvent:(UIButton *)button {
+    self.paintingView.strokeImageName = @"closelyCircle.png";
+}
+#pragma mark switch event
+- (void)fingerSwitchChange:(UISwitch *)switchs {
+    self.paintingView.openFingerStroke = switchs.on;
 }
 
 #pragma mark slider event
@@ -66,7 +93,7 @@
 - (UIButton *)eraseButton {
     if (_eraseButton == nil) {
         _eraseButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        [_eraseButton setTitle:@"erase" forState:UIControlStateNormal];
+        [_eraseButton setTitle:@"清屏" forState:UIControlStateNormal];
         [_eraseButton setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
         [_eraseButton addTarget:self action:@selector(eraseEvent:) forControlEvents:UIControlEventTouchUpInside];
         [self.view addSubview:_eraseButton];
@@ -74,7 +101,48 @@
     return _eraseButton;
 }
 
--(UISlider *)strokeWidthSlider{
+- (UIButton *)snowButton {
+    if (_snowButton == nil) {
+        _snowButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_snowButton setImage:[UIImage imageNamed:@"snow.png"] forState:UIControlStateNormal];
+        [_snowButton addTarget:self action:@selector(snowEvent:) forControlEvents:UIControlEventTouchUpInside];
+        [self.view addSubview:_snowButton];
+    }
+    return _snowButton;
+}
+
+- (UIButton *)circleButton {
+    if (_circleButton == nil) {
+        _circleButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_circleButton setImage:[UIImage imageNamed:@"circle.png"] forState:UIControlStateNormal];
+        [_circleButton setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
+        [_circleButton addTarget:self action:@selector(circleEvent:) forControlEvents:UIControlEventTouchUpInside];
+        [self.view addSubview:_circleButton];
+    }
+    return _circleButton;
+}
+
+- (UIButton *)otherButton {
+    if (_otherButton == nil) {
+        _otherButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_otherButton setTitle:@"其它" forState:UIControlStateNormal];
+        [_otherButton setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
+        [_otherButton addTarget:self action:@selector(otherEvent:) forControlEvents:UIControlEventTouchUpInside];
+        [self.view addSubview:_otherButton];
+    }
+    return _otherButton;
+}
+
+- (UISwitch *)fingerSwitch {
+    if (_fingerSwitch == nil) {
+        _fingerSwitch = [[UISwitch alloc]init];
+        [_fingerSwitch addTarget:self action:@selector(fingerSwitchChange:) forControlEvents:UIControlEventValueChanged];
+        [self.view addSubview:_fingerSwitch];
+    }
+    return _fingerSwitch;
+}
+
+- (UISlider *)strokeWidthSlider {
     
     if (_strokeWidthSlider == nil) {
         
@@ -101,7 +169,7 @@
     return _strokeWidthSlider;
 }
 
--(UISlider *)strokeStepSlider{
+- (UISlider *)strokeStepSlider {
     
     if (_strokeStepSlider == nil) {
         
@@ -128,7 +196,7 @@
     return _strokeStepSlider;
 }
 
--(UISlider *)strokeAlphaSlider{
+- (UISlider *)strokeAlphaSlider {
     
     if (_strokeAlphaSlider == nil) {
         

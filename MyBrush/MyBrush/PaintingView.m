@@ -96,7 +96,7 @@ typedef struct {
         self.strokeStep = KStrokeStep;
         self.strokeWidth = KStrokeWidth;
         self.strokeAlpha = KStrokeOpacity;
-        
+        _strokeImageName = @"circle.png";//加载笔刷图片:eye.png、snow.png、circle.png、circleLine.png、closelyCircle.png、crossLine.png、sparseCircle.png、starPoint.png
         
     }
     
@@ -265,7 +265,7 @@ typedef struct {
     glUniform1f([brushShader locationForUniform:@"u_scale"], 1.5);
     
     //加载笔刷图片:eye.png、snow.png、circle.png、circleLine.png、closelyCircle.png、crossLine.png、sparseCircle.png、starPoint.png、
-    NSString *brushName = @"snow.png";
+    NSString *brushName = self.strokeImageName;
     brushTexture = [self textureFromName:[UIImage imageNamed:brushName]];
     // the brush texture will be bound to texture unit 0
     glUniform1i([brushShader locationForUniform:@"u_texture"], 0);
@@ -528,10 +528,11 @@ typedef struct {
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    NSLog(@"touchesMoved");
+//    NSLog(@"touchesMoved");
     UITouch *touch = [[event touchesForView:self] anyObject];
     endPoint = [self pointSuitable:[touch locationInView:self]];
-    NSLog(@"\nforce:%f\npossibleForce:%f",touch.force,touch.maximumPossibleForce);
+    NSLog(@"touchesMoved:%@",NSStringFromCGPoint([touch locationInView:self]));
+//    NSLog(@"\nforce:%f\npossibleForce:%f",touch.force,touch.maximumPossibleForce);
 //    NSLog(@"\nradius:%f\nradiusTolerance:%f",touch.majorRadius,touch.majorRadiusTolerance);
     
     if (self.openFingerStroke) {
@@ -583,6 +584,29 @@ typedef struct {
     // Display the buffer
     glBindRenderbuffer(GL_RENDERBUFFER, viewRenderbuffer);
     [self.context presentRenderbuffer:GL_RENDERBUFFER];
+}
+
+//更换笔刷
+- (void)setStrokeImageName:(NSString *)strokeImageName {
+    
+    _strokeImageName = strokeImageName;
+    
+    ShaderModel *brushShader = [self getShader:@"brush"];
+    glUseProgram(brushShader.program);
+    
+    if (&brushTexture) {
+        //清理
+        glDeleteTextures(1, &brushTexture.id);
+    }
+    
+    brushTexture = [self textureFromName:[UIImage imageNamed:strokeImageName]];
+    // the brush texture will be bound to texture unit 0
+    glUniform1i([brushShader locationForUniform:@"u_texture"], 0);
+    
+    //激活纹理单元，以便后续glBindTexture调用将纹理绑定到‘当前活动单元’
+    glActiveTexture(GL_TEXTURE0);
+    // Bind the texture name.
+    glBindTexture(GL_TEXTURE_2D, brushTexture.id);
 }
 
 #pragma mark - Getter And Setter

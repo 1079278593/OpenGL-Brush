@@ -72,7 +72,7 @@
 
 
 
-
+#pragma mark 这里变化
 - (void)onRes:(id)sender {
     degree += bX * 5;
     yDegree += bY * 5;
