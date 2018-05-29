@@ -31,8 +31,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "599"
             endingLineNumber = "599"
-            landmarkName = "-setStrokeImageName:"
-            landmarkType = "7">
+            landmarkName = "PaintingView"
+            landmarkType = "3">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -47,7 +47,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "596"
             endingLineNumber = "596"
-            landmarkName = "-setStrokeImageName:"
+            landmarkName = "-touchesCancelled:withEvent:"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

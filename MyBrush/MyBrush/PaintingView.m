@@ -98,6 +98,7 @@ typedef struct {
         self.strokeAlpha = KStrokeOpacity;
         _strokeImageName = @"circle.png";//加载笔刷图片:eye.png、snow.png、circle.png、circleLine.png、closelyCircle.png、crossLine.png、sparseCircle.png、starPoint.png
         
+        [self addGestureRecognizer:[[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(panGesture:)]];
     }
     
     return self;
@@ -517,6 +518,30 @@ typedef struct {
 #pragma mark - Touch Event
 - (BOOL)canBecomeFirstResponder {
     return YES;
+}
+
+- (void)panGesture:(UIPanGestureRecognizer *)gesture {
+    
+    switch (gesture.state) {
+        case UIGestureRecognizerStateBegan:
+        {
+                
+        }
+            break;
+        case UIGestureRecognizerStateChanged:
+        {
+            
+        }
+            break;
+        case UIGestureRecognizerStateEnded:
+        {
+            
+        }
+            break;
+            
+        default:
+            break;
+    }
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
