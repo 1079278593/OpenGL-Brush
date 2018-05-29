@@ -57,6 +57,8 @@ typedef struct {
     CGPoint movePoint;
     CGPoint endPoint;
     
+    UIPanGestureRecognizer *panGesture;
+    
     NSDictionary *shaders;//存储所有着色器
     
 }
@@ -444,6 +446,10 @@ typedef struct {
     CGFloat width = self.strokeWidth;
     CGPoint start = startPoint;
     CGPoint end = endPoint;
+    UIPanGestureRecognizer *gesture = panGesture;
+    CGPoint v2 = [gesture velocityInView:self];
+    CGFloat v = sqrt(v2.x*v2.x+v2.y*v2.y);
+    width -= v/10000.0*width+5;
     
     VertexData *vertices = calloc(sizeof(VertexData), count * 6);
     
@@ -525,12 +531,23 @@ typedef struct {
     switch (gesture.state) {
         case UIGestureRecognizerStateBegan:
         {
-                
+            startPoint = [self pointSuitable:[gesture locationInView:self]];
+            CGPoint v = [gesture velocityInView:self];
+            NSLog(@"touchesBegan%@",NSStringFromCGPoint(v));
         }
             break;
         case UIGestureRecognizerStateChanged:
         {
+            panGesture = gesture;
+            endPoint = [self pointSuitable:[gesture locationInView:self]];
+            CGPoint v = [gesture velocityInView:self];
+            NSLog(@"touchesMoved:%@",NSStringFromCGPoint(v));
             
+            //绘制
+            [self renderLine];
+            if (WDDistance(startPoint, endPoint)>self.strokeStep) {
+                startPoint = endPoint;
+            }
         }
             break;
         case UIGestureRecognizerStateEnded:
@@ -544,37 +561,18 @@ typedef struct {
     }
 }
 
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
-{
-    NSLog(@"touchesBegan");
-    UITouch *touch = [[event touchesForView:self] anyObject];
-    startPoint = [self pointSuitable:[touch locationInView:self]];
-}
-
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
 //    NSLog(@"touchesMoved");
     UITouch *touch = [[event touchesForView:self] anyObject];
-    endPoint = [self pointSuitable:[touch locationInView:self]];
-    NSLog(@"touchesMoved:%@",NSStringFromCGPoint([touch locationInView:self]));
-//    NSLog(@"\nforce:%f\npossibleForce:%f",touch.force,touch.maximumPossibleForce);
-//    NSLog(@"\nradius:%f\nradiusTolerance:%f",touch.majorRadius,touch.majorRadiusTolerance);
-    
     if (self.openFingerStroke) {
         self.strokeAlpha = 0.2+touch.force/touch.maximumPossibleForce;
         self.strokeWidth = (touch.majorRadius+touch.majorRadiusTolerance)*3;
     }
-
     //更新笔刷的一些配置：透明度等
     ShaderModel *brushShader = [self getShader:@"brush"];
     glUseProgram(brushShader.program);
     glUniform1f([brushShader locationForUniform:@"u_alpha"], self.strokeAlpha);
-    
-    //绘制
-    [self renderLine];
-    if (WDDistance(startPoint, endPoint)>self.strokeStep) {
-        startPoint = endPoint;
-    }
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
