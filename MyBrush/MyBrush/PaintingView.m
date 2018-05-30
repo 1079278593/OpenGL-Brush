@@ -444,24 +444,26 @@ typedef struct {
 
 - (VertexData *)generateVertex:(int)count {
     
+    if (count == 0) {
+        return 0;
+    }
+    
     CGFloat maxWidth = self.strokeWidth;
     CGPoint start = startPoint;
     CGPoint end = endPoint;
     UIPanGestureRecognizer *gesture = panGesture;
     CGPoint v2 = [gesture velocityInView:self];
     CGFloat v = fmin(sqrt(v2.x*v2.x+v2.y*v2.y), 10000);
-    CGFloat endWidth = maxWidth*(1 - v/10000.0)+5;
+    CGFloat endWidth = maxWidth*(1 - v/10000.0)+1;
     CGFloat dtWidth = 0;
     if (lastWidth == 0) {
-        lastWidth = self.strokeWidth;
+        lastWidth = maxWidth;
         
-    }else {
-//        dtWidth = (lastWidth - width)/count;//根据count决定变化量，带正负号,lastWidth初始为0
     }
-    dtWidth = (lastWidth - width)/count;//根据count决定变化量，带正负号,lastWidth初始为0
-    width = lastWidth;
-    
+    dtWidth = (lastWidth - endWidth)/count;//根据count决定变化量，带正负号,lastWidth初始为0
+    NSLog(@"end:%f last:%f dtWidth:%f count:%d",endWidth,lastWidth,dtWidth,count);
     VertexData *vertices = calloc(sizeof(VertexData), count * 6);
+    
     
     int n = 0;
     for (int i = 0; i<count; i++) {
@@ -469,8 +471,9 @@ typedef struct {
         CGPoint centerPoint = CGPointZero;
         centerPoint.x = start.x + (end.x - start.x) * ((GLfloat)i / (GLfloat)count);
         centerPoint.y = start.y + (end.y - start.y) * ((GLfloat)i / (GLfloat)count);
-        CGFloat brushWidth = width/2.0 - dtWidth*count;
-        lastWidth = brushWidth;
+        CGFloat brushWidth = (lastWidth - dtWidth*i)/2.0;//这里被自己坑了，应该先减掉再除以2
+        brushWidth = fmax(brushWidth, 1);
+//        NSLog(@"brushWidth:%f",brushWidth);
         
         GLfloat angle = (float)(arc4random()%100+1);//
         
@@ -530,7 +533,7 @@ typedef struct {
         n++;
     }
     
-//    lastWidth = width;
+    lastWidth = endWidth;
     
     return vertices;
 }
@@ -555,7 +558,7 @@ typedef struct {
             panGesture = gesture;
             endPoint = [self pointSuitable:[gesture locationInView:self]];
             CGPoint v = [gesture velocityInView:self];
-            NSLog(@"touchesMoved:%@",NSStringFromCGPoint(v));
+//            NSLog(@"touchesMoved:%@",NSStringFromCGPoint(v));
             
             //绘制
             [self renderLine];
