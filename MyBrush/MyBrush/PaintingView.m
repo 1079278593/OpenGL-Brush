@@ -18,10 +18,10 @@
 
 //#define KStrokScale            2      //缩放倍数
 #define KOpenFingerStroke       NO      //默认不开启
-#define KStrokeStep             50.0    //图章间的间距,单位是像素(pixel)
+#define KStrokeStep             2.0    //图章间的间距,单位是像素(pixel)
 #define KStrokeColor            [UIColor lightGrayColor]
-#define KStrokeWidth            80.0    //正方形图章：边长
-#define KStrokeOpacity          0.8     //80%透明度
+#define KStrokeWidth            50.0    //正方形图章：边长
+#define KStrokeOpacity          1.0     //80%透明度
 
 // Texture
 typedef struct {
@@ -39,27 +39,27 @@ typedef struct {
 @interface PaintingView() {
     
     // The pixel dimensions of the backbuffer:后置缓冲
-    GLint backingWidth;
-    GLint backingHeight;
-        
+    GLint backingWidth,backingHeight;
+    
     // OpenGL names for the renderbuffer and framebuffers used to render to this view
     GLuint viewRenderbuffer, viewFramebuffer;
     
     // OpenGL name for the depth buffer that is attached to viewFramebuffer, if it exists (0 if it does not exist)
     GLuint depthRenderbuffer;
     
-    TextureInfo brushTexture;     // brush texture
-    TextureInfo maskTexture;
+    TextureInfo brushTexture,maskTexture;     // brush texture
+    
+    NSDictionary *shaders;//存储所有着色器
     
     BOOL initialized;//初始状态
     
-    CGPoint startPoint;
-    CGPoint movePoint;
-    CGPoint endPoint;
-    
     UIPanGestureRecognizer *panGesture;
     
-    NSDictionary *shaders;//存储所有着色器
+    CGPoint startPoint,endPoint;
+    
+    CGFloat lastWidth;
+    
+    
     
 }
 
@@ -98,7 +98,8 @@ typedef struct {
         self.strokeStep = KStrokeStep;
         self.strokeWidth = KStrokeWidth;
         self.strokeAlpha = KStrokeOpacity;
-        _strokeImageName = @"circle.png";//加载笔刷图片:eye.png、snow.png、circle.png、circleLine.png、closelyCircle.png、crossLine.png、sparseCircle.png、starPoint.png
+        _strokeImageName = @"";//加载笔刷图片:eye.png、snow.png、circle.png、circleLine.png、closelyCircle.png、crossLine.png、sparseCircle.png、starPoint.png
+        lastWidth = 0;
         
         [self addGestureRecognizer:[[UIPanGestureRecognizer alloc]initWithTarget:self action:@selector(panGesture:)]];
     }
@@ -443,13 +444,22 @@ typedef struct {
 
 - (VertexData *)generateVertex:(int)count {
     
-    CGFloat width = self.strokeWidth;
+    CGFloat maxWidth = self.strokeWidth;
     CGPoint start = startPoint;
     CGPoint end = endPoint;
     UIPanGestureRecognizer *gesture = panGesture;
     CGPoint v2 = [gesture velocityInView:self];
-    CGFloat v = sqrt(v2.x*v2.x+v2.y*v2.y);
-    width -= v/10000.0*width+5;
+    CGFloat v = fmin(sqrt(v2.x*v2.x+v2.y*v2.y), 10000);
+    CGFloat endWidth = maxWidth*(1 - v/10000.0)+5;
+    CGFloat dtWidth = 0;
+    if (lastWidth == 0) {
+        lastWidth = self.strokeWidth;
+        
+    }else {
+//        dtWidth = (lastWidth - width)/count;//根据count决定变化量，带正负号,lastWidth初始为0
+    }
+    dtWidth = (lastWidth - width)/count;//根据count决定变化量，带正负号,lastWidth初始为0
+    width = lastWidth;
     
     VertexData *vertices = calloc(sizeof(VertexData), count * 6);
     
@@ -459,13 +469,14 @@ typedef struct {
         CGPoint centerPoint = CGPointZero;
         centerPoint.x = start.x + (end.x - start.x) * ((GLfloat)i / (GLfloat)count);
         centerPoint.y = start.y + (end.y - start.y) * ((GLfloat)i / (GLfloat)count);
-        
+        CGFloat brushWidth = width/2.0 - dtWidth*count;
+        lastWidth = brushWidth;
         
         GLfloat angle = (float)(arc4random()%100+1);//
         
         //左下
-        vertices[n].x = centerPoint.x - width/2.0;
-        vertices[n].y = centerPoint.y - width/2.0;
+        vertices[n].x = centerPoint.x - brushWidth;
+        vertices[n].y = centerPoint.y - brushWidth;
         vertices[n].z = 0;
         vertices[n].s = 0.0;
         vertices[n].t = 0.0;
@@ -473,8 +484,8 @@ typedef struct {
         n++;
         
         //右下
-        vertices[n].x = centerPoint.x + width/2.0;
-        vertices[n].y = centerPoint.y - width/2.0;
+        vertices[n].x = centerPoint.x + brushWidth;
+        vertices[n].y = centerPoint.y - brushWidth;
         vertices[n].z = 0;
         vertices[n].s = 1.0;
         vertices[n].t = 0.0;
@@ -482,8 +493,8 @@ typedef struct {
         n++;
         
         //右上
-        vertices[n].x = centerPoint.x + width/2.0;
-        vertices[n].y = centerPoint.y + width/2.0;
+        vertices[n].x = centerPoint.x + brushWidth;
+        vertices[n].y = centerPoint.y + brushWidth;
         vertices[n].z = 0;
         vertices[n].s = 1.0;
         vertices[n].t = 1.0;
@@ -492,8 +503,8 @@ typedef struct {
         
         //第二个三角形
         //右上
-        vertices[n].x = centerPoint.x + width/2.0;
-        vertices[n].y = centerPoint.y + width/2.0;
+        vertices[n].x = centerPoint.x + brushWidth;
+        vertices[n].y = centerPoint.y + brushWidth;
         vertices[n].z = 0;
         vertices[n].s = 1.0;
         vertices[n].t = 1.0;
@@ -501,8 +512,8 @@ typedef struct {
         n++;
         
         //左上
-        vertices[n].x = centerPoint.x - width/2.0;
-        vertices[n].y = centerPoint.y + width/2.0;
+        vertices[n].x = centerPoint.x - brushWidth;
+        vertices[n].y = centerPoint.y + brushWidth;
         vertices[n].z = 0;
         vertices[n].s = 0.0;
         vertices[n].t = 1.0;
@@ -510,14 +521,17 @@ typedef struct {
         n++;
         
         //左下
-        vertices[n].x = centerPoint.x - width/2.0;
-        vertices[n].y = centerPoint.y - width/2.0;
+        vertices[n].x = centerPoint.x - brushWidth;
+        vertices[n].y = centerPoint.y - brushWidth;
         vertices[n].z = 0;
         vertices[n].s = 0.0;
         vertices[n].t = 0.0;
         vertices[n].angle = angle;
         n++;
     }
+    
+//    lastWidth = width;
+    
     return vertices;
 }
 

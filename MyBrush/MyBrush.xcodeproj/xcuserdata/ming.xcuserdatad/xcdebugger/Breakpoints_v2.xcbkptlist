@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "MyBrush/PaintingView.m"
-            timestampString = "549292622.7580841"
+            timestampString = "549363456.339969"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "281"
-            endingLineNumber = "281"
+            startingLineNumber = "282"
+            endingLineNumber = "282"
             landmarkName = "-setupAttributes"
             landmarkType = "7">
          </BreakpointContent>
