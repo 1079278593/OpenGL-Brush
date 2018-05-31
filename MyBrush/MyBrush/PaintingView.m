@@ -15,6 +15,7 @@
 #import "ShaderModel.h"
 #import "WDUtilities.h"
 #import "UIImage+Mask.h"
+#import "UIBezierPath+Geometry.h"
 
 //#define KStrokScale            2      //缩放倍数
 #define KOpenFingerStroke       NO      //默认不开启
@@ -55,7 +56,7 @@ typedef struct {
     
     UIPanGestureRecognizer *panGesture;
     
-    CGPoint startPoint,endPoint;
+    CGPoint startPoint,endPoint,midPoint;
     
     CGFloat lastWidth;
     
@@ -431,7 +432,7 @@ typedef struct {
     [self.context presentRenderbuffer:GL_RENDERBUFFER];
 }
 
-#pragma mark 顶点设置
+#pragma mark - 顶点设置
 - (CGPoint)pointSuitable:(CGPoint)point {
     //屏幕触摸的坐标，必须转换成分辨率坐标，即乘以layer的：contentScaleFactor
     //同时，需要从左上角坐标原点转为左下角为坐标原点
@@ -453,8 +454,8 @@ typedef struct {
     CGPoint end = endPoint;
     UIPanGestureRecognizer *gesture = panGesture;
     CGPoint v2 = [gesture velocityInView:self];
-    CGFloat v = fmin(sqrt(v2.x*v2.x+v2.y*v2.y), 10000);
-    CGFloat endWidth = maxWidth*(1 - v/10000.0)+1;
+    CGFloat v = fmin(sqrt(v2.x*v2.x+v2.y*v2.y), 6000);
+    CGFloat endWidth = maxWidth*(1 - v/6000.0)+4;
     CGFloat dtWidth = 0;
     if (lastWidth == 0) {
         lastWidth = maxWidth;
@@ -471,7 +472,122 @@ typedef struct {
         CGPoint centerPoint = CGPointZero;
         centerPoint.x = start.x + (end.x - start.x) * ((GLfloat)i / (GLfloat)count);
         centerPoint.y = start.y + (end.y - start.y) * ((GLfloat)i / (GLfloat)count);
-        CGFloat brushWidth = (lastWidth - dtWidth*i)/2.0;//这里被自己坑了，应该先减掉再除以2
+        CGFloat brushWidth = (lastWidth - dtWidth*i)/2.0;//先减掉再除以2
+        brushWidth = fmax(brushWidth, 1);
+        //        NSLog(@"brushWidth:%f",brushWidth);
+        
+        GLfloat angle = (float)(arc4random()%100+1);//
+        
+        //左下
+        vertices[n].x = centerPoint.x - brushWidth;
+        vertices[n].y = centerPoint.y - brushWidth;
+        vertices[n].z = 0;
+        vertices[n].s = 0.0;
+        vertices[n].t = 0.0;
+        vertices[n].angle = angle;
+        n++;
+        
+        //右下
+        vertices[n].x = centerPoint.x + brushWidth;
+        vertices[n].y = centerPoint.y - brushWidth;
+        vertices[n].z = 0;
+        vertices[n].s = 1.0;
+        vertices[n].t = 0.0;
+        vertices[n].angle = angle;
+        n++;
+        
+        //右上
+        vertices[n].x = centerPoint.x + brushWidth;
+        vertices[n].y = centerPoint.y + brushWidth;
+        vertices[n].z = 0;
+        vertices[n].s = 1.0;
+        vertices[n].t = 1.0;
+        vertices[n].angle = angle;
+        n++;
+        
+        //第二个三角形
+        //右上
+        vertices[n].x = centerPoint.x + brushWidth;
+        vertices[n].y = centerPoint.y + brushWidth;
+        vertices[n].z = 0;
+        vertices[n].s = 1.0;
+        vertices[n].t = 1.0;
+        vertices[n].angle = angle;
+        n++;
+        
+        //左上
+        vertices[n].x = centerPoint.x - brushWidth;
+        vertices[n].y = centerPoint.y + brushWidth;
+        vertices[n].z = 0;
+        vertices[n].s = 0.0;
+        vertices[n].t = 1.0;
+        vertices[n].angle = angle;
+        n++;
+        
+        //左下
+        vertices[n].x = centerPoint.x - brushWidth;
+        vertices[n].y = centerPoint.y - brushWidth;
+        vertices[n].z = 0;
+        vertices[n].s = 0.0;
+        vertices[n].t = 0.0;
+        vertices[n].angle = angle;
+        n++;
+    }
+    
+    lastWidth = endWidth;
+    
+    return vertices;
+}
+
+- (VertexData *)generateVertex_new {
+    
+    int count = 0;
+    CGFloat step = self.strokeStep;
+    CGPoint start = startPoint;
+    CGPoint end = endPoint;
+    CGPoint newMiddle = CGPointMake((start.x+end.x)*0.5, (start.y+end.y)*0.5);
+    
+    //宽度
+    UIPanGestureRecognizer *gesture = panGesture;
+    CGFloat maxWidth = self.strokeWidth;
+    CGPoint v2 = [gesture velocityInView:self];
+    CGFloat v = fmin(sqrt(v2.x*v2.x+v2.y*v2.y), 6000);
+    CGFloat endWidth = maxWidth*(1 - v/6000.0)+4;
+    CGFloat dtWidth = 0;
+    if (lastWidth == 0) lastWidth = maxWidth;
+    dtWidth = (lastWidth - endWidth)/count;//根据count决定变化量，带正负号,lastWidth初始为0
+    NSLog(@"end:%f last:%f dtWidth:%f count:%d",endWidth,lastWidth,dtWidth,count);
+    
+    UIBezierPath *bezierPath = [UIBezierPath bezierPath];
+    
+    if (midPoint.x == 0 && midPoint.y == 0) {
+        [bezierPath moveToPoint:start];
+        [bezierPath addLineToPoint:newMiddle];
+    }else {
+        [bezierPath moveToPoint:midPoint];
+        [bezierPath addQuadCurveToPoint:newMiddle controlPoint:start];
+    }
+    
+    //
+    midPoint = newMiddle;
+    
+    //1.先计算点
+    if (bezierPath.length<step) {
+        
+    }else {
+        while (1) {
+            
+        }
+    }
+    //
+    VertexData *vertices = calloc(sizeof(VertexData), count * 6);
+    int n = 0;
+    for (int i = 0; i<count; i++) {
+        
+        CGPoint centerPoint = CGPointZero;
+        centerPoint.x = start.x + (end.x - start.x) * ((GLfloat)i / (GLfloat)count);
+        centerPoint.y = start.y + (end.y - start.y) * ((GLfloat)i / (GLfloat)count);
+        CGFloat brushWidth = (lastWidth - dtWidth*i)/2.0;//先减掉再除以2
         brushWidth = fmax(brushWidth, 1);
 //        NSLog(@"brushWidth:%f",brushWidth);
         

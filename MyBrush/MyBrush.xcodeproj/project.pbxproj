@@ -35,6 +35,11 @@
 		3A8DE2D620B506AF001D353C /* colordodge.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 3A8DE2CB20B506AF001D353C /* colordodge.fsh */; };
 		3A8DE2D720B506AF001D353C /* exclusion.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 3A8DE2CC20B506AF001D353C /* exclusion.fsh */; };
 		3A8DE2DA20B506E9001D353C /* WDUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A8DE2D820B506E9001D353C /* WDUtilities.m */; };
+		3AF5F9BF20BFE465008FC8ED /* UIBezierPath+Geometry.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AF5F9B520BFE465008FC8ED /* UIBezierPath+Geometry.m */; };
+		3AF5F9C020BFE465008FC8ED /* CuvbicCurveGeometry.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AF5F9B720BFE465008FC8ED /* CuvbicCurveGeometry.m */; };
+		3AF5F9C120BFE465008FC8ED /* QuadCurveGeometry.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AF5F9B820BFE465008FC8ED /* QuadCurveGeometry.m */; };
+		3AF5F9C220BFE465008FC8ED /* LineGeometry.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AF5F9B920BFE465008FC8ED /* LineGeometry.m */; };
+		3AF5F9C320BFE465008FC8ED /* VectorGeometry.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AF5F9BA20BFE465008FC8ED /* VectorGeometry.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -97,6 +102,16 @@
 		3A8DE2CC20B506AF001D353C /* exclusion.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = exclusion.fsh; sourceTree = "<group>"; };
 		3A8DE2D820B506E9001D353C /* WDUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WDUtilities.m; sourceTree = "<group>"; };
 		3A8DE2D920B506E9001D353C /* WDUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WDUtilities.h; sourceTree = "<group>"; };
+		3AF5F9B520BFE465008FC8ED /* UIBezierPath+Geometry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIBezierPath+Geometry.m"; sourceTree = "<group>"; };
+		3AF5F9B620BFE465008FC8ED /* VectorGeometry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VectorGeometry.h; sourceTree = "<group>"; };
+		3AF5F9B720BFE465008FC8ED /* CuvbicCurveGeometry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CuvbicCurveGeometry.m; sourceTree = "<group>"; };
+		3AF5F9B820BFE465008FC8ED /* QuadCurveGeometry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QuadCurveGeometry.m; sourceTree = "<group>"; };
+		3AF5F9B920BFE465008FC8ED /* LineGeometry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LineGeometry.m; sourceTree = "<group>"; };
+		3AF5F9BA20BFE465008FC8ED /* VectorGeometry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VectorGeometry.m; sourceTree = "<group>"; };
+		3AF5F9BB20BFE465008FC8ED /* UIBezierPath+Geometry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIBezierPath+Geometry.h"; sourceTree = "<group>"; };
+		3AF5F9BC20BFE465008FC8ED /* QuadCurveGeometry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QuadCurveGeometry.h; sourceTree = "<group>"; };
+		3AF5F9BD20BFE465008FC8ED /* CuvbicCurveGeometry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CuvbicCurveGeometry.h; sourceTree = "<group>"; };
+		3AF5F9BE20BFE465008FC8ED /* LineGeometry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LineGeometry.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -127,6 +142,7 @@
 		3A8DE24E20AA74C4001D353C = {
 			isa = PBXGroup;
 			children = (
+				3AF5F9B420BFE465008FC8ED /* UIBezierPath+Geometry */,
 				3A8DE29420AAAFA9001D353C /* Shader Utils */,
 				3A8DE28F20AA7618001D353C /* Shaders */,
 				3A8DE25920AA74C4001D353C /* MyBrush */,
@@ -226,6 +242,23 @@
 				3A8DE2CC20B506AF001D353C /* exclusion.fsh */,
 			);
 			path = Blend;
+			sourceTree = "<group>";
+		};
+		3AF5F9B420BFE465008FC8ED /* UIBezierPath+Geometry */ = {
+			isa = PBXGroup;
+			children = (
+				3AF5F9BE20BFE465008FC8ED /* LineGeometry.h */,
+				3AF5F9B920BFE465008FC8ED /* LineGeometry.m */,
+				3AF5F9B620BFE465008FC8ED /* VectorGeometry.h */,
+				3AF5F9BA20BFE465008FC8ED /* VectorGeometry.m */,
+				3AF5F9BC20BFE465008FC8ED /* QuadCurveGeometry.h */,
+				3AF5F9B820BFE465008FC8ED /* QuadCurveGeometry.m */,
+				3AF5F9BD20BFE465008FC8ED /* CuvbicCurveGeometry.h */,
+				3AF5F9B720BFE465008FC8ED /* CuvbicCurveGeometry.m */,
+				3AF5F9BB20BFE465008FC8ED /* UIBezierPath+Geometry.h */,
+				3AF5F9B520BFE465008FC8ED /* UIBezierPath+Geometry.m */,
+			);
+			path = "UIBezierPath+Geometry";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -374,13 +407,18 @@
 			files = (
 				3A8DE2A320AABAFA001D353C /* ShaderModel.m in Sources */,
 				3A8DE25F20AA74C4001D353C /* ViewController.m in Sources */,
+				3AF5F9C120BFE465008FC8ED /* QuadCurveGeometry.m in Sources */,
 				3A8DE26A20AA74C5001D353C /* main.m in Sources */,
 				3A8DE28E20AA7510001D353C /* PaintingView.m in Sources */,
+				3AF5F9C220BFE465008FC8ED /* LineGeometry.m in Sources */,
+				3AF5F9C020BFE465008FC8ED /* CuvbicCurveGeometry.m in Sources */,
 				3A8DE2DA20B506E9001D353C /* WDUtilities.m in Sources */,
 				3A8DE2A020AABA53001D353C /* ShaderUtil.m in Sources */,
 				3A01EB9720B69CA3002941CA /* UIImage+Mask.m in Sources */,
 				3A8DE29B20AAAFA9001D353C /* gl_matrix.c in Sources */,
 				3A8DE25C20AA74C4001D353C /* AppDelegate.m in Sources */,
+				3AF5F9C320BFE465008FC8ED /* VectorGeometry.m in Sources */,
+				3AF5F9BF20BFE465008FC8ED /* UIBezierPath+Geometry.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
