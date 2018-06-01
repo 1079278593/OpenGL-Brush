@@ -248,7 +248,7 @@ typedef struct {
     glGenBuffers(1, &vboId);
     
     // Load the brush texture:Particle.png、eye.png、hole.png
-    brushTexture = [self textureFromName:@"snow.png"];
+    brushTexture = [self textureFromName:@"Particle.png"];
     
     // Load shaders
     [self setupShaders];
@@ -258,48 +258,48 @@ typedef struct {
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     
     //1.读取路径绘制
-    NSString* path = [[NSBundle mainBundle] pathForResource:@"abc" ofType:@"string"];
-    NSString* str = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
-    lyArr = [NSMutableArray array];
-    NSArray* jsonArr = [NSJSONSerialization JSONObjectWithData:[str dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingAllowFragments error:nil];
-    for (NSDictionary* dict in jsonArr) {
-        LYPoint* point = [LYPoint new];
-        point.mX = [dict objectForKey:@"mX"];
-        point.mY = [dict objectForKey:@"mY"];
-        [lyArr addObject:point];
-    }
+//    NSString* path = [[NSBundle mainBundle] pathForResource:@"abc" ofType:@"string"];
+//    NSString* str = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
+//    lyArr = [NSMutableArray array];
+//    NSArray* jsonArr = [NSJSONSerialization JSONObjectWithData:[str dataUsingEncoding:NSUTF8StringEncoding] options:NSJSONReadingAllowFragments error:nil];
+//    for (NSDictionary* dict in jsonArr) {
+//        LYPoint* point = [LYPoint new];
+//        point.mX = [dict objectForKey:@"mX"];
+//        point.mY = [dict objectForKey:@"mY"];
+//        [lyArr addObject:point];
+//    }
     
     //2.线性插值绘制：P0={20, 120}, P1={120, 340}, P2={240, 340}, P3={320, 180};
-    //    CubicPathFunc *pathCalculate = [[CubicPathFunc alloc]init];
-    //    pathCalculate.pathPoints = [self getCubicPath];
-    //    lyArr = [NSMutableArray array];
-    //    for (NSValue *value in [pathCalculate linearInterpolation]) {
-    //        LYPoint* point = [LYPoint new];
-    //        point.mX = @(value.CGPointValue.x);
-    //        point.mY = @(value.CGPointValue.y);
-    //        [lyArr addObject:point];
-    //    }
+        CubicPathFunc *pathCalculate = [[CubicPathFunc alloc]init];
+        pathCalculate.pathPoints = [self getCubicPath];
+        lyArr = [NSMutableArray array];
+        for (NSValue *value in [pathCalculate linearInterpolation]) {
+            LYPoint* point = [LYPoint new];
+            point.mX = @(value.CGPointValue.x);
+            point.mY = @(value.CGPointValue.y);
+            [lyArr addObject:point];
+        }
     
     //3.二分法曲线绘制
-    //    UIBezierPath *path3 = [self bezierPath1];
-    //    lyArr = [NSMutableArray array];
-    //    for (int i = 0; i < 40; i++) {
-    //        CGPoint percentPoint = [path3 pointAtPercentOfLength:(i/40.0)];
-    //        LYPoint* point = [LYPoint new];
-    //
-    //        point.mX = @(percentPoint.x);
-    //        point.mY = @(percentPoint.y);
-    //        [lyArr addObject:point];
-    //    }
+//        UIBezierPath *path3 = [self bezierPath1];
+//        lyArr = [NSMutableArray array];
+//        for (int i = 0; i < 40; i++) {
+//            CGPoint percentPoint = [path3 pointAtPercentOfLength:(i/40.0)];
+//            LYPoint* point = [LYPoint new];
+//
+//            point.mX = @(percentPoint.x);
+//            point.mY = @(percentPoint.y);
+//            [lyArr addObject:point];
+//        }
     
     //4.任意阶贝塞尔绘制
-    //    lyArr = [NSMutableArray array];
-    //    for (NSArray *dims in [BezierPathFunc pointsFromControlPoints:[self anyBezierPaths] precision:1200]) {
-    //        LYPoint* point = [LYPoint new];
-    //        point.mX = dims[0];//@([ floatValue]);
-    //        point.mY = dims[1];//@([dims[0] floatValue]);
-    //        [lyArr addObject:point];
-    //    }
+//        lyArr = [NSMutableArray array];
+//        for (NSArray *dims in [BezierPathFunc pointsFromControlPoints:[self anyBezierPaths] precision:1200]) {
+//            LYPoint* point = [LYPoint new];
+//            point.mX = dims[0];//@([ floatValue]);
+//            point.mY = dims[1];//@([dims[0] floatValue]);
+//            [lyArr addObject:point];
+//        }
     
     //5.贝塞尔曲线：长度计算比较
     //    [self compareEqual];
@@ -457,7 +457,7 @@ typedef struct {
 	
 	// Clear the buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, viewFramebuffer);
-	glClearColor(1.0, 1.0, 1.0, 1.0);
+	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	
 	// Display the buffer
@@ -657,7 +657,7 @@ typedef struct {
     
     //曲线2：P0={20, 120}, P1={120, 340}, P2={240, 340}, P3={20, 120};
     [path moveToPoint:CGPointMake(20, 120)];
-    [path addCurveToPoint:CGPointMake(20, 120) controlPoint1:CGPointMake(120, 340) controlPoint2:CGPointMake(240, 340)];
+    [path addCurveToPoint:CGPointMake(30, 120) controlPoint1:CGPointMake(120, 340) controlPoint2:CGPointMake(240, 340)];
 
     return path;
 }
@@ -700,9 +700,9 @@ typedef struct {
     qudaPath.P1 = CGPointMake(20, 120);
      */
     qudaPath.P0 = CGPointMake(20, 120);
-    qudaPath.C0 = CGPointMake(10, 540);
-    qudaPath.C1 = CGPointMake(120, 160);
-    qudaPath.P1 = CGPointMake(20, 120);
+    qudaPath.C0 = CGPointMake(120, 340);
+    qudaPath.C1 = CGPointMake(240, 340);
+    qudaPath.P1 = CGPointMake(30, 120);
     return qudaPath;
 }
 

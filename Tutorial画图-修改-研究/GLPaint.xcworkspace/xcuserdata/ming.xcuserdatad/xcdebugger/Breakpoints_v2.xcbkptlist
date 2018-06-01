@@ -20,22 +20,6 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "CGpathConvert/CGPathCalculate/BezierPathFunc.m"
-            timestampString = "539838041.354099"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "34"
-            endingLineNumber = "34"
-            landmarkName = "+pointsFromControlPoints:precision:"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "CGpathConvert/CGPathCalculate/BezierPathFunc.m"
             timestampString = "539838041.354683"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
@@ -68,7 +52,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Classes/PaintingView.m"
-            timestampString = "548241265.3537101"
+            timestampString = "549528664.784822"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "600"

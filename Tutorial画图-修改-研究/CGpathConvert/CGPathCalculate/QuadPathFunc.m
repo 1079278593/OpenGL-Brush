@@ -74,7 +74,7 @@
     return (pow(bx, 2)+pow(by, 2));
 }
 
-#pragma mark - 3455
+#pragma mark - Public
 
 /*
  *速度函数
